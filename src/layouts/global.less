@@ -1,0 +1,90 @@
+//antd、noform、nowrapper、nolist的样式
+@import '~antd/dist/antd.less';
+@import '~noform/dist/index.css';
+@import '~nowrapper/dist/antd/index.css';
+@import '~nowrapper/dist/antd/repeater.css';
+@import '~nolist/dist/wrapper/antd.css';
+//换行显示，用于角色分配
+.newLine {
+  width: 100%;
+  white-space: pre-wrap;
+}
+
+//用于BackLayout.jsx的样式
+.left-block {
+  display: inline-block;
+  width: 150px;
+  text-align: left;
+  color: #fff;
+  font-size: 20px;
+  padding-left: 30px;
+}
+
+.left-none {
+  display: inline-block;
+  width: 80px;
+  text-align: center;
+  color: #fff;
+  font-size: 20px;
+}
+
+.trigger {
+  font-size: 22px;
+  cursor: pointer;
+  transition: color 0.3s;
+  color: #fff;
+}
+
+.title {
+  display: inline-block;
+  text-align: center;
+  color: #fff;
+  font-size: 24px;
+  padding-left: 15px;
+}
+
+.right {
+  float: right;
+  color: #fff;
+  text-align: center;
+  font-size: 16px;
+}
+
+.user {
+  display: inline-block;
+  width: 150px;
+}
+
+.user:hover {
+  background: #87CEFA;
+  cursor: pointer;
+}
+
+//noForm
+.ant-modal-body .ant-modal-confirm-body-wrapper {
+  margin-top: -12px;
+}
+
+.ant-modal-confirm-body-wrapper .ant-modal-confirm-body .ant-modal-confirm-title {
+  border-bottom: 1px solid #e8e8e8;
+  padding-bottom: 5px;
+}
+
+.ant-modal-confirm-body-wrapper .ant-modal-confirm-body .ant-modal-confirm-content {
+  margin-top: 24px;
+}
+
+.ant-modal-confirm-body-wrapper .ant-modal-confirm-body .ant-modal-confirm-content .noform-dialog-custom-btns {
+  margin-top: 24px;
+}
+
+.no-form-item + .no-form-item {
+  margin-top: 24px;
+}
+
+//附件
+.ant-upload.ant-upload-drag p.ant-upload-drag-icon {
+  margin-bottom: 0;
+}
+
+
