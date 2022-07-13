@@ -200,7 +200,7 @@ export default (props) => {
                 const data = await ajax.get(asDeviceCommonPath.getLevelTwoAsTypeById, { typeId: value })
                 if (data) {
                   setTypeId(data.id)
-                  core.setValue('asDeviceCommon.typeId', value)
+                  core.setValue('asDeviceCommon.typeId', value)// 20220626这个赋值似乎不用写：包装他的formItem能自动获取
                 }
               }}
             />

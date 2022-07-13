@@ -89,12 +89,27 @@ export default () => {
      
       </div>
     </FormItem>
+    <FormItem label="限审批发起" name="startLimitedByCheck">
+    <Radio.Group defaultValue="否" 
+        options={[
+          { label: '是', value: '是' },
+          { label: '否', value: '否' }]}/>
+    </FormItem>
     <FormItem label="状态" name="status"  defaultMinWidth={false} required>
     <Select  defaultValue="启用" 
         style={{ width:120 }}
         options={[
           { label: '启用', value:'启用'},
           { label: '停用', value: '停用' },
+         ]}/>
+    </FormItem>
+    <FormItem label="集成模式" name="integrationMode"  defaultMinWidth={false} required>
+    <Select  defaultValue="实体流程" 
+        style={{ width:120 }}
+        options={[
+          { label: '实体流程', value:'实体流程'},
+          { label: '代理流程,', value: '代理流程' },
+          // { label: '子流程', value: '子流程' },
          ]}/>
     </FormItem>
     <FormItem>

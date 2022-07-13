@@ -66,7 +66,7 @@ export default (props) => {
           <AutoComplete style={{ width: 150 }} options={noOptionTmp} />
         </FormItem>
       </Col>
-      <Col span={8}>
+      <Col  span={8}>
         <FormItem label="资产名称" name="name" defaultMinWidth={false} ><Input style={{ width: 150 }} /></FormItem>
       </Col>
       <Col span={8}>
@@ -75,7 +75,13 @@ export default (props) => {
           <Button icon='reload' onClick={() => onClick('reload')}>重置</Button>
         </Space>
       </Col>
-    </Row>
+    </Row> 
+           {/* <Row gutter={[8, 16]}>
+      <Col  style = {{background:'red'}} span={12}>   <Button icon='search' type='primary'>查询</Button></Col>
+      <Col  style = {{background:'red'}} span={12}></Col>
+      <Col  style = {{background:'red'}} span={12}>col-12</Col>
+      <Col  style = {{background:'red'}} span={12}>col-12</Col>
+    </Row> */}
     <List url={asDeviceCommonPath.list} params={props.params} onMount={listT => { setList(listT) }} formatAfter={listFormatAfter} formatBefore={listFormatBefore}>
       <Table rowKey='id'
         rowSelection={{

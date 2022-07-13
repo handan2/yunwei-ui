@@ -83,7 +83,7 @@ const formRule = {
       let tmp = {}
       if (flag === 'stringify') {
         Object.keys(values).forEach(key => {
-          if (values[key]) {
+          if (values[key]) {//过滤了null值
             //判断key是否以Datetime结尾
             if (_.endsWith(key, 'DatetimeTmp') || _.endsWith(key, 'DateTmp')) {
               delete values[key]

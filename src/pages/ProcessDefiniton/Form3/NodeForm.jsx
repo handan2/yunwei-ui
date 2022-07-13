@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Form, { FormCore, FormItem, Item } from 'noform'
 import { Dialog, Input, Radio } from 'nowrapper/lib/antd'
-import { message } from 'antd'
+import { message, Divider } from 'antd'
 import UserTransfer from './UserTransfer'
 import GroupTransfer from './GroupTransfer'
 import { ajax, sysDeptPath, sysRolePath, sysUserPath, processFormTemplatePath } from '../../../utils'
@@ -13,17 +13,14 @@ const width = 280
 
 export default (props) => {
   console.log('nodeform-------------')
-  console.log(props.map)
   const [core] = useState(new FormCore())
-
   if (props.data) {//这个指是从nodeMap里取的（含DB里已经有的结点 及 DB无但已手工添加过node&第二次打开）
     core.setValues(props.data)
     core.setStatus('operatorTypeLabel', 'disabled')//注意这个setStatus：作用于formItem/Item; operatorTypeLabel就是task表中的同名字段
   } else {//nodeMap没有值，新建的node节点
-    core.reset()
+    //core.reset()
     core.setValues({ taskType: props.node.type, taskDefKey: props.node.id })//
     core.setStatus('operatorTypeLabel', 'disabled')//20220518同上一个逻辑分支，这两种情况这个formItem都是不可编辑状态：可直接在formItem下包装的那个input组件加一个disable属性
-    core.setValue('haveSelectAsset', '否')
     //设置Radio.Group默认选中状态
     if (props.node.type === 'bpmn:startTask') {
       core.setValue('haveNextUser', '否')
@@ -41,7 +38,6 @@ export default (props) => {
   const [userTree, setUserTree] = useState()
   const [groupTree, setGroupTree] = useState()
   useEffect(async () => {
-    console.log('20220603----')
     const data1 = await ajax.get(sysRolePath.getRoleKT)
     data1 && setRoleArr(data1)
     const data2 = await ajax.get(sysDeptPath.getDeptUserTree)
@@ -123,7 +119,7 @@ export default (props) => {
               { label: '是', value: '是' },
               { label: '否', value: '否' }]} />
         </FormItem>
-        <FormItem name="haveEditForm" label="允许修改表单">
+        <FormItem name="haveEditForm" label="允许修改表单" defaultValue='否'>
           <Radio.Group
             options={[
               { label: '是', value: '是' },
@@ -197,7 +193,11 @@ export default (props) => {
         }} style={{ fontSize: 15 }}>选择</a>
       </div>
     </FormItem>
-    <FormItem label='选择隐藏表单内容' required>
+
+    {renderItem()}
+
+    <Divider style={{ fontSize: 14, lineHeight: 0, paddingTop: 20 }}>以下为高级设置</Divider>
+    <FormItem label='选择隐藏表单内容'>
       <div>
         <Item name='hideGroupLabel'><Input disabled style={{ width: width, marginRight: 5 }} /></Item>
         <a onClick={() => {
@@ -206,7 +206,7 @@ export default (props) => {
             footerAlign: 'label',
             locale: 'zh',
             width: 700,
-            //20220603 改造：groupTree要从model里读:尤其是新建字段组（此时没写进DB）
+            //20220603 todo改造：groupTree要从model里读:尤其是新建字段组（此时没写进DB）
             content: <GroupTransfer core={core} groupTree={groupTree} />,
             onOk: async (values, hide) => {
               core.setValue('hideGroupLabel', values.hideGroupLabel)
@@ -217,12 +217,17 @@ export default (props) => {
         }} style={{ fontSize: 15 }}>选择</a>
       </div>
     </FormItem>
-    <FormItem name='haveSelectAsset' label="是否可选择设备">
+    <FormItem name='haveSelectAsset' label="是否可选择设备" defaultValue='否'>
       <Radio.Group
         options={[
           { label: '是', value: '是' },
           { label: '否', value: '否' }]} />
     </FormItem>
-    {renderItem()}
+    <FormItem name='haveSelectProcess' label="是否可选择后续流程" defaultValue='否'>
+      <Radio.Group
+        options={[
+          { label: '是', value: '是' },
+          { label: '否', value: '否' }]} />
+    </FormItem>
   </Form>
 }

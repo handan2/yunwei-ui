@@ -54,7 +54,7 @@ export default () => {
     if (type === 'startProcess') {
       //
       const userVL = await ajax.get(sysUserPath.getUserVL)
-      const groupTree = await ajax.get(processFormTemplatePath.getFormTemplateGroupTree, { processDefinitionId: record.id })
+      const groupTree = await ajax.get(processFormTemplatePath.getFormTemplateGroupTreeForSelect, { processDefinitionId: record.id })
       //选择责任人和字段组
       let userType, userIdStr, userName, selectGroupIdArr
       Dialog.show({

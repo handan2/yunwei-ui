@@ -28,11 +28,11 @@ import CheckUserTransfer from './CheckUserTransfer';
 
 let hasChangeDisk = false;//20220618 文件中的这个变量生命周期：直到浏览器URL重新刷新：只是把原页面在界面上关闭不会消亡
 export default (props) => {
-  console.log('process start 渲染了hasChangeDisk的值：')
-  console.log(hasChangeDisk)
+  console.log('20220702   ------------')
+  console.log(props)
   const [core] = useState(new FormCore());
   //表类型中资产设备真实的数据 <自定义表id,as_id>
-const [assetMap, setAssetMap] = useState(new Map());
+  const [assetMap, setAssetMap] = useState(new Map());
   const [assetParam, setAssetParam] = useState();
   const [roleArr, setRoleArr] = useState();
   const [userTree, setUserTree] = useState();
@@ -41,6 +41,15 @@ const [assetMap, setAssetMap] = useState(new Map());
   const [diskStateOptions, setDiskStateOptions] = useState([{ label: '在用', value: '在用' }, { label: '报废', value: '报废' }, { label: '填错', value: '填错' }])//
   // const [assetForComputer, setAssetForComputer] = useState({});//todo问，啥时初始值必须设？
   useEffect(async () => {
+
+    //20220703把选择资产按钮后触发的赋值前置到这里
+    core.setValues(props.tableTypeInstData.map);
+    core.setValues('repeater', { dataSource: props.tableTypeInstData.diskList })
+    core.setValues('diskListForHisForProcess', props.tableTypeInstData.diskList)
+    core.setValues('diskChangeDec', '')
+    core.setValue('asset', props.asset);
+
+
     if (
       props.startProcessConditionVO &&
       props.startProcessConditionVO.haveNextUser === '是'
@@ -82,9 +91,9 @@ const [assetMap, setAssetMap] = useState(new Map());
       <Table.Column title="容量(GB)" dataIndex="price" />
       <Table.Column title="密级" dataIndex="miji" />
       <Table.Column title="状态" dataIndex="state" />
-      <Table.Column title="变更类型" dataIndex="flag" style={{ color: 'red' }}   render={(value, record) => {
-            return value ? <span  style={{ color: 'red' }}>{value}</span> : <span>---</span>;
-        }}/>
+      <Table.Column title="变更类型" dataIndex="flag" style={{ color: 'red' }} render={(value, record) => {
+        return value ? <span style={{ color: 'red' }}>{value}</span> : <span>---</span>;
+      }} />
       <Table.Column title="操作" render={(value, record, index) => {
         return <div>
           <ActionButton core={coreList[index]} type="update"><Button size="small">编辑</Button></ActionButton>
@@ -107,14 +116,14 @@ const [assetMap, setAssetMap] = useState(new Map());
         success: true,
         item: {
           madeDate: moment().format('YYYY-MM-DD'),
-         // userName: assetForComputer.userName,
-        //  userDept: assetForComputer.userDept,
+          // userName: assetForComputer.userName,
+          //  userDept: assetForComputer.userDept,
           miji: assetForComputer.miji,
-        //  userMiji: assetForComputer.userMiji,
+          //  userMiji: assetForComputer.userMiji,
           hostAsId: assetForComputer.id,
           hostAsNo: assetForComputer.no,
           state: '在用',
-      //    typeId: 25,//给他固产分类ID：其他类型（注意是一级分类）
+          //    typeId: 25,//给他固产分类ID：其他类型（注意是一级分类）
           name: '硬盘',
           //   flag: '新增',
           netType: assetForComputer.netType,
@@ -175,13 +184,13 @@ const [assetMap, setAssetMap] = useState(new Map());
                 core.setValues('diskChangeDec', '修改硬盘（序列号:' + values[index].sn + ')信息:' + modifyContent + '；' + diskChangeDec)
               }
               item = values[index]
-              item.flag = '修改'       
-            }      
-          }else{
+              item.flag = '修改'
+            }
+          } else {
             item.model = values[index].model
             item.price = values[index].price
-            item.state =values[index].state        
-          }   
+            item.state = values[index].state
+          }
           return item
         })
       }
@@ -252,7 +261,7 @@ const [assetMap, setAssetMap] = useState(new Map());
    */
   const renderFormItem = (formTree, level, colNum) => {
     let resultArr = [], tmpArr = [];
-    const hideGroupLabelArr = props.startProcessConditionVO?.hideGroupLabel?.split(',')
+    const hideGroupLabelArr = props.startProcessConditionVO.hideGroupLabel?.split(',')
     //props.startProcessConditionVO &&
     formTree?.forEach((item) => {
       if (item.flag === '字段组类型') {
@@ -333,96 +342,96 @@ const [assetMap, setAssetMap] = useState(new Map());
             {props.tableTypeVO &&
               props.tableTypeVO[item.type.split('.')[0]].map(
                 (itemm, index, arr) => {
-                  if (index === 0) {
+                  // if (index === 0) {
+                  //   return (
+                  //     <Col span={24 / colNum}>
+                  //       <FormItem label={itemm.label.split('.')[1]} required>
+                  //         <div>
+                  //           {/* <FormItem
+                  //             name={itemm.name + 'ErrMsg'}
+                  //             style={{ display: 'none' }}
+                  //           >
+                  //             <Input />
+                  //           </FormItem> */}
+                  //           <Item
+                  //             name={itemm.name}
+                  //             validateConfig={{
+                  //               operatorType: 'string',
+                  //               required: true,
+                  //               message: itemm.label.split('.')[1] + '不能为空',
+                  //             }}
+                  //           >
+                  //             <Input
+                  //               disabled
+                  //               style={{ width: width, marginRight: 5 }}
+                  //             />
+                  //           </Item>
+                  //           <a
+                  //             style={{ fontSize: 15 }}
+                  //             onClick={() => selectAsset(itemm)}
+                  //           >
+                  //             选择
+                  //           </a>
+                  //           <Item
+                  //             render={(values, context) => {
+                  //               if (values[itemm.name + 'ErrMsg']) {
+                  //                 return (
+                  //                   <div style={{ color: 'red' }}>
+                  //                     {values[itemm.name + 'ErrMsg']}
+                  //                   </div>
+                  //                 );
+                  //               }
+                  //               return null;
+                  //             }}
+                  //           />
+                  //         </div>
+                  //       </FormItem>
+                  //     </Col>
+                  //   );
+                  // } else {
+                  if (itemm.label.split('.')[1] === '硬盘信息（用于渲染）')
+                    return (<>
+                      <Col span={24} style={{ background: '#f0f0f0', fontWeight: 'bolder', padding: 0, margin: 0, border: '1px solid #f0f0f0' }}>
+                        <FormItem layout={{ label: 4, control: 20 }} style={{ fontWeight: 'bolder' }} label={hasChangeDisk ? '硬盘变更（可选）' : '硬盘信息'}>
+                        </FormItem>
+                      </Col>
+                      <Col span={24} style={{ padding: 0, margin: 0, }}>
+                        <FormItem name="repeater" layout={{ label: 2, control: 22 }}>
+                          <SelectTableRepeater style={{ width: '100%' }} width={'100%'} locale='zh' hasAdd={repeaterModify} hasDelete={false} hasUpdate={repeaterModify} view={renderView}>
+                            <FormItem label='序列号' status={(values, core) => {
+                                return (values.flag ==='新增' || values.flag===undefined)? 'edit':'disabled'  //刚点新增按钮弹出的界面，flag是undefined
+                            }} name='sn' required validateConfig={{ type: 'string', required: true, message: '必填项' }}><Input style={{ width: '100px' }}  placeholder='若实物未购置，请填“待定”'/></FormItem>
+                            <FormItem label='型号' name='model' required validateConfig={{ type: 'string', required: true, message:'必填项' }}><Input style={{ width: '100px' }}  placeholder='若实物未购置，请填“待定”'/></FormItem>
+                            <FormItem label="容量（GB）" name="price" validateConfig={{ type: 'number', required: true, message:'必填项'}}><InputNumber style={{ width: '100px' }}  placeholder='若实物未购置，请填“待定”'/></FormItem>
+                            <FormItem label="密级" name="miji"><Input style={{ width: '100px' }} placeholder='自动填充' disabled /></FormItem>
+                            <FormItem status={(values, core) => {
+                              return values.hostAsId ? 'edit' : 'disabled'
+                            }} label='状态' name='state' defaultValue='在用' ><RadioGroup style={{ width: 200 }} options={diskStateOptions} /></FormItem>
+                            <FormItem label="主机ID" name="hostAsId" ><InputNumber style={{ width: '100px' }} placeholder='自动填充' disabled /></FormItem>
+                          </SelectTableRepeater>
+                        </FormItem>
+                      </Col>
+                      <Col span={24} >
+                        <FormItem layout={{ label: 4, control: 20 }}
+                          label='变更情况' name='diskChangeDec'  >
+                          {/* 因在effect里初始置空串，所以不能用defaultValue*/}
+                          <Input disabled style={{ width: width * 3.5, fontWeight: 'bolder', color: 'red' }} placeholder='无变更' />
+                        </FormItem>
+                      </Col>
+
+                    </>
+                    )
+                  else
                     return (
                       <Col span={24 / colNum}>
-                        <FormItem label={itemm.label.split('.')[1]} required>
-                          <div>
-                            {/* <FormItem
-                              name={itemm.name + 'ErrMsg'}
-                              style={{ display: 'none' }}
-                            >
-                              <Input />
-                            </FormItem> */}
-                            <Item
-                              name={itemm.name}
-                              validateConfig={{
-                                operatorType: 'string',
-                                required: true,
-                                message: itemm.label.split('.')[1] + '不能为空',
-                              }}
-                            >
-                              <Input
-                                disabled
-                                style={{ width: width, marginRight: 5 }}
-                              />
-                            </Item>
-                            <a
-                              style={{ fontSize: 15 }}
-                              onClick={() => selectAsset(itemm)}
-                            >
-                              选择
-                            </a>
-                            <Item
-                              render={(values, context) => {
-                                if (values[itemm.name + 'ErrMsg']) {
-                                  return (
-                                    <div style={{ color: 'red' }}>
-                                      {values[itemm.name + 'ErrMsg']}
-                                    </div>
-                                  );
-                                }
-                                return null;
-                              }}
-                            />
-                          </div>
+                        <FormItem
+                          label={itemm.label.split('.')[1]} name={itemm.name} >
+                          <Input disabled style={{ width: width }} />
                         </FormItem>
                       </Col>
                     );
-                  } else {
-                    if (itemm.label.split('.')[1] === '硬盘信息（用于渲染）')
-                      return (<>
-                        <Col span={24} style={{ background: '#f0f0f0', fontWeight: 'bolder', padding: 0, margin: 0, border: '1px solid #f0f0f0' }}>
-                          <FormItem layout={{ label: 4, control: 20 }} style={{ fontWeight: 'bolder' }} label={hasChangeDisk ? '硬盘变更（可选）' : '硬盘信息'}>
-                          </FormItem>
-                        </Col>
-                        <Col span={24} style={{ padding: 0, margin: 0, }}>
-                          <FormItem name="repeater" layout={{ label: 2, control: 22 }}>
-                            <SelectTableRepeater style={{ width: '100%' }} width={'100%'} locale='zh' hasAdd={repeaterModify} hasDelete={false} hasUpdate={repeaterModify} view={renderView}>
-                              <FormItem label='序列号' status={(values, core) => {
-                                 return (values.flag ==='新增' || values.flag===undefined)? 'edit':'disabled'  //刚点新增按钮弹出的界面，flag是undefined
-                              }} name='sn' required validateConfig={{ type: 'string', required: true, message:'必填项' }}><Input style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”'/></FormItem>
-                              <FormItem label='型号' name='model' required validateConfig={{ type: 'string', required: true, message: '必填项' }}><Input style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”'/></FormItem>
-                              <FormItem label="容量（GB）" name="price" validateConfig={{ type: 'number', required: true, message: '必填项' }}><InputNumber style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”'/></FormItem>
-                              <FormItem label="密级" name="miji"><Input style={{ width: '100px' }} placeholder='自动填充' disabled /></FormItem>
-                              <FormItem status={(values, core) => {
-                                return values.hostAsId ? 'edit' : 'disabled'
-                              }} label='状态' name='state' defaultValue='在用' ><RadioGroup style={{ width: 200 }} options={diskStateOptions} /></FormItem>
-                              <FormItem label="主机ID" name="hostAsId" ><InputNumber style={{ width: '100px' }} placeholder='自动填充' disabled /></FormItem>
-                            </SelectTableRepeater>
-                          </FormItem>
-                        </Col>
-                        <Col span={24} >
-                          <FormItem layout={{ label: 4, control: 20 }}
-                            label='变更情况' name='diskChangeDec'  >
-                              {/* 因在effect里初始置空串，所以不能用defaultValue*/}
-                            <Input disabled style={{ width: width * 3.5, fontWeight: 'bolder', color: 'red' }} placeholder='无变更' />                  
-                          </FormItem>
-                        </Col>
+                }
 
-                      </>
-                      )
-                    else
-                      return (
-                        <Col span={24 / colNum}>
-                          <FormItem
-                            label={itemm.label.split('.')[1]} name={itemm.name} >
-                            <Input disabled style={{ width: width }} />
-                          </FormItem>
-                        </Col>
-                      );
-                  }
-                },
               )}
           </Row>,
         );

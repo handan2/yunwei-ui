@@ -27,7 +27,7 @@ export default (props) => {
         <FormItem>
           <div style={{ width: 500 }}>
             <Transfer
-              dataSource={groupTree}
+              dataSource={props.groupTree}
               targetKeys={targetKeys}
               render={item => item.title}
               titles={['可见表单内容', '隐藏表单内容']}

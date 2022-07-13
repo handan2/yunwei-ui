@@ -54,6 +54,8 @@ export const accountPath= {
 export const asTypePath = {
   getAsTypeIdByName:contextPath + '/asType/getAsTypeIdByName',
   getAllowedAsTypeIdByProDefId:contextPath + '/asType/getAllowedAsTypeIdByProDefId',
+  getLevelTwoAsTypeLV:contextPath + '/asType/getLevelTwoAsTypeLV',
+
 }
 //审计日志
 export const auditPath = {
@@ -184,16 +186,19 @@ export const processDefinitionPath = {
   delete: contextPath + '/processDefinition/delete',
   getTypeVL: contextPath + '/processDefinition/getTypeVL',
   getBaseTypeVL: contextPath + '/processDefinition/getBaseTypeVL',
-  getTreeByTableNames: contextPath + '/processDefinition/getTreeByTableNames'
+  getTreeByTableNames: contextPath + '/processDefinition/getTreeByTableNames',
+  getProcessDefLV: contextPath + '/processDefinition/getProcessDefLV',
+  getOneCustomTableIdByProcDefId: contextPath + '/processDefinition/getOneCustomTableIdByProcDefId',
+  getByName:contextPath + '/processDefinition/getByName',
 }
 export let processFormTemplatePath = {
   getFormTemplateTree: contextPath + '/processFormTemplate/getFormTemplateTree',
-  getFormTemplateGroupTree: contextPath + '/processFormTemplate/getFormTemplateGroupTree',
+  getFormTemplateGroupTreeForSelect: contextPath + '/processFormTemplate/getFormTemplateGroupTreeForSelect',
   getSelectGroupIdList: contextPath + '/processFormTemplate/getSelectGroupIdList',
   getTableTypeVO: contextPath + '/processFormTemplate/getTableTypeVO',
   getTableTypeInstData: contextPath + '/processFormTemplate/getTableTypeInstData',
-  getFormTemplateIdLableMap:contextPath + '/processFormTemplate/getFormTemplateIdLableMap',
-  getGroupKT:contextPath + '/processFormTemplate/getGroupKT'
+  getChangeColumnIdLableMap:contextPath + '/processFormTemplate/getChangeColumnIdLableMap',
+  getGroupKT:contextPath + '/processFormTemplate/getGroupKT',
 }
 //流程实例
 export const processInstanceDataPath = {
@@ -204,12 +209,15 @@ export const processInstanceDataPath = {
   historyList: contextPath + '/processInstanceData/historyList',
   get: contextPath + '/processInstanceData/get',
   start: contextPath + '/processInstanceData/start',
+  endAndStart:contextPath + '/processInstanceData/endAndStart',
   handle: contextPath + '/processInstanceData/handle',
   delete: contextPath + '/processInstanceData/delete',
   getStartProcessConditionVO: contextPath + '/processInstanceData/getStartProcessConditionVO',
-  getCheckProcessConditionVO: contextPath + '/processInstanceData/getCheckProcessConditionVO',
+  getCheckTaskVO: contextPath + '/processInstanceData/getCheckTaskVO',
   getActiveTaskDefKeyList: contextPath + '/processInstanceData/getActiveTaskDefKeyList',
-  modify: contextPath + '/processInstanceData/modify'
+  modify: contextPath + '/processInstanceData/modify',
+  getNewProcessDef:contextPath + '/processInstanceData/getNewProcessDef',
+  getOneDeviceByProcessInstId:contextPath + '/processInstanceData/getOneDeviceByProcessInstId'
 }
 //待办任务
 export const processInstanceDataMyPath = {

@@ -84,6 +84,8 @@ export default (props) => {
               return
             }
             //存储
+            console.log('20220626 nodeForm values')
+            console.log(values)
             nodeMap.set(node.id, values)
             //设置节点名称
             lf.updateText(node.id, values.taskName)
@@ -100,8 +102,8 @@ export default (props) => {
           footerAlign: 'label',
           locale: 'zh',
           enableValidate: true,
-          width: 600,
-          content: <EdgeForm edge={edge} data={edgeMap.get(edge.id)} />,
+          width: 500,
+          content: <EdgeForm edge={edge} data={edgeMap.get(edge.id)} map={map}  />,
           onOk: (values, hide) => {
             //存储
             edgeMap.set(edge.id, values)

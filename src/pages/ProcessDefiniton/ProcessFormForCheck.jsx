@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { Col, Divider, message, Row, Table, Tabs, Button } from 'antd'
+import { Col, Divider, message, Row, Table, Tabs, Button, ConfigProvider } from 'antd'
 import Form, { FormCore, FormItem, Item, If } from 'noform'
-import { Checkbox, Dialog, InputNumber, Input, Radio } from 'nowrapper/lib/antd'
+import { Checkbox, Dialog, InputNumber, Select, Input, Radio } from 'nowrapper/lib/antd'
 const { Group: RadioGroup } = Radio;
-import { ajax, formRule, sysDeptPath, sysRolePath, sysUserPath, width, asTypePath, processFormTemplatePath } from '../../utils'
+import { ajax, formRule, sysDeptPath, sysRolePath, sysUserPath, width, asTypePath, processFormTemplatePath, processDefinitionPath } from '../../utils'
 import getFormItem from './getFormItem'
 import _ from 'lodash'
 import CheckUserTransfer from './CheckUserTransfer'
@@ -18,11 +18,13 @@ const SelectTableRepeater = Selectify(TableRepeater);
 const { TabPane } = Tabs
 
 let hasChangeDisk = false;
+
 //用于待办任务
 export default (props) => {
   const [core] = useState(new FormCore())
   const [assetMap, setAssetMap] = useState(new Map());
   const [assetParam, setAssetParam] = useState();
+  const [processSelectOptions, setProcessSelectOptions] = useState([]);
   const [repeaterModify, setRepeaterModify] = useState(false); //20220616加
   const [diskStateOptions, setDiskStateOptions] = useState([{ label: '在用', value: '在用' }, { label: '报废', value: '报废' }, { label: '填错', value: '填错' }])//
   useEffect(async () => {
@@ -32,15 +34,15 @@ export default (props) => {
     //20220622
     core.setValues({ ...values, diskListForHisForProcess: props.diskListForHisForProcess })
     // 是否允许修改表单
-    if (props.checkProcessConditionVO) {
-      if (props.checkProcessConditionVO.haveEditForm === '否') {
+    if (props.checkTaskVO) {
+      if (props.checkTaskVO.haveEditForm === '否') {
         core.setStatus('disabled')//这个把所有的可编辑关了，所以下面再把部分不需要被控制的form组件编辑性打开
         //操作记录
-        if (props.checkProcessConditionVO.haveOperate === '是') {
+        if (props.checkTaskVO.haveOperate === '是') {
           core.setStatus('operate', 'edit')
         }
         //审批意见
-        if (props.checkProcessConditionVO.haveComment === '是') {
+        if (props.checkTaskVO.haveComment === '是') {
           core.setStatus('comment', 'edit')
         }
       } else //20220621
@@ -53,21 +55,27 @@ export default (props) => {
     }); //20211110
 
     data3 && setAssetParam({ typeId: data3 });
-    //formItemAutoComplete(props.templateIdLableMap, core, props.userInfo)
+    const data4 = await ajax.get(processDefinitionPath.getProcessDefLV) //20220626加
+    console.log('data4')
+    console.log(data4)
+    data4 && setProcessSelectOptions(data4)
+    //formItemAutoComplete(props.changeColumnIdLableMap, core, props.userInfo)
     core.setProps({//20220613
       repeater: { asyncHandler }
     })
+    if (!core.getValues().diskChangeDec)
+      core.setValues('diskChangeDec', '')
   }, []);
-  const renderTableColumn = () => {
+  const renderTableColumn = (coreList) => {
     if (repeaterModify)
-    return<Table.Column title="操作" render={(value, record, index) => {
-      return <div>
+      return <Table.Column title="操作" render={(value, record, index) => {
+        return <div>
 
-        <ActionButton core={coreList[index]} type="update"><Button size="small">编辑</Button></ActionButton>
-        {/* <ActionButton core={coreList[index]} type="delete"><Button size="small">Remove</Button></ActionButton> */}
+          <ActionButton core={coreList[index]} type="update"><Button size="small">编辑</Button></ActionButton>
+          {/* <ActionButton core={coreList[index]} type="delete"><Button size="small">Remove</Button></ActionButton> */}
 
-      </div>;
-    }} />
+        </div>;
+      }} />
   }
   const renderView = (_, ctx) => {
     const dataSource = ctx.getDataSource();
@@ -85,7 +93,7 @@ export default (props) => {
       <Table.Column title="变更类型" dataIndex="flag" style={{ color: 'red' }} render={(value, record) => {
         return value ? <span style={{ color: 'red' }}>{value}</span> : <span>---</span>;
       }} />
-    {renderTableColumn()} 
+      {renderTableColumn(coreList)}
     </Table>
   }
 
@@ -174,7 +182,7 @@ export default (props) => {
               item = values[index]
               item.flag = '修改'
 
- 
+
             }
 
 
@@ -257,7 +265,7 @@ export default (props) => {
    */
   const renderFormItem = (formTree, level, colNum) => {
     let resultArr = [], tmpArr = []
-    const hideGroupLabelArr = props.checkProcessConditionVO?.hideGroupLabel?.split(',')//20220527
+    const hideGroupLabelArr = props.checkTaskVO?.hideGroupLabel?.split(',')//20220527
     formTree.forEach(item => {
       if (item.flag === '字段组类型') {
         if (props.selectGroupIdArr && _.indexOf(props.selectGroupIdArr, item.id) >= 0
@@ -324,7 +332,7 @@ export default (props) => {
                           <Item
                             name={itemm.name}
                             validateConfig={{
-                              operatorType: 'string',
+                              type: 'string',
                               required: true,
                               message: itemm.label.split('.')[1] + '不能为空',
                             }}
@@ -334,7 +342,7 @@ export default (props) => {
                               style={{ width: width, marginRight: 5 }}
                             />
                           </Item>
-                          <If when={(values) => props.checkProcessConditionVO.haveSelectAsset === '是'}>
+                          <If when={(values) => props.checkTaskVO.haveSelectAsset === '是'}>
                             <a
                               style={{ fontSize: 15 }}
                               onClick={() => selectAsset(itemm)}
@@ -369,10 +377,15 @@ export default (props) => {
                         <FormItem name="repeater" layout={{ label: 2, control: 22 }}>
                           <SelectTableRepeater style={{ width: '100%' }} width={'100%'} locale='zh' hasAdd={repeaterModify} view={renderView}>
                             <FormItem label='序列号' status={(values, core) => {
-                              return values.hostAsId ? 'disabled' : 'edit'
-                            }} name='sn' required validateConfig={{ type: 'string', required: true, message: '序列号不能为空' }}><Input style={{ width: '100px' }} /></FormItem>
-                            <FormItem label='型号' name='model' required validateConfig={{ type: 'string', required: true, message: '型号不能为空' }}><Input style={{ width: '100px' }} /></FormItem>
-                            <FormItem label="容量（GB）" name="price" validateConfig={{ type: 'number', required: true, message: '容量不能为空' }}><InputNumber style={{ width: '100px' }} /></FormItem>
+                                //  if(/.*[\u4e00-\u9fa5]+.*$/.test(values.sn)) {
+                                //   alert("不能含有汉字！");
+                                //   return false;
+                                // }
+                           
+                              return (values.flag ==='新增' || values.flag===undefined)? 'edit':'disabled'  //刚点新增按钮弹出的界面，flag是undefined
+                            }} name='sn' required validateConfig={{ type: 'string', required: true, message: '必填项”' }}><Input style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”'/></FormItem>
+                            <FormItem label='型号' name='model' required validateConfig={{ type: 'string', required: true, message: '必填项' }}><Input style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”' /></FormItem>
+                            <FormItem label="容量（GB）" name="price" validateConfig={{ type: 'number', required: true, message: '必填项' }}><InputNumber style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”'/></FormItem>
                             <FormItem label="密级" name="miji"><Input style={{ width: '100px' }} placeholder='自动填充' disabled /></FormItem>
                             <FormItem status={(values, core) => {
                               return values.hostAsId ? 'edit' : 'disabled'
@@ -423,7 +436,7 @@ export default (props) => {
   const [roleArr, setRoleArr] = useState()
   const [userTree, setUserTree] = useState()
   useEffect(async () => {
-    if (props.checkProcessConditionVO && props.checkProcessConditionVO.haveNextUser === '是') {
+    if (props.checkTaskVO && props.checkTaskVO.haveNextUser === '是') {
       const data1 = await ajax.get(sysRolePath.getRoleKT)
       data1 && setRoleArr(data1)
       const data2 = await ajax.get(sysDeptPath.getDeptUserTree)
@@ -432,7 +445,7 @@ export default (props) => {
   }, [])
   //是否有下一步处理人
   const renderHaveNextUser = () => {
-    if (props.checkProcessConditionVO && props.checkProcessConditionVO.haveNextUser === '是') {
+    if (props.checkTaskVO && props.checkTaskVO.haveNextUser === '是') {
       return <div>
         <Row style={{
           border: '1px solid #f0f0f0',
@@ -453,11 +466,11 @@ export default (props) => {
           <Col span={24 / props.processDefinition.formLayout}>
             <FormItem label='处理人' required>
               <div>
-                <FormItem name={'typeLabelErrMsg'} style={{ display: 'none' }}><Input /></FormItem>
+                <FormItem name={'operatorTypeLabelErrMsg'} style={{ display: 'none' }}><Input /></FormItem>
                 <Item
                   name='operatorTypeLabel'
                   validateConfig={{
-                    operatorType: 'string',
+                    type: 'string',
                     required: true,
                     message: '处理人不能为空'
                   }}
@@ -505,8 +518,8 @@ export default (props) => {
                   })
                 }} style={{ fontSize: 15 }}>选择</a>
                 <Item render={(values, context) => {
-                  if (values['typeLabelErrMsg']) {
-                    return <div style={{ color: 'red' }}>{values['typeLabelErrMsg']}</div>
+                  if (values['operatorTypeLabelErrMsg']) {
+                    return <div style={{ color: 'red' }}>{values['operatorTypeLabelErrMsg']}</div>
                   }
                   return null
                 }} />
@@ -519,7 +532,7 @@ export default (props) => {
   }
   //是否有操作记录
   const renderHaveOperate = () => {
-    if (props.checkProcessConditionVO && props.checkProcessConditionVO.haveOperate === '是') {
+    if (props.checkTaskVO && props.checkTaskVO.haveOperate === '是') {
       return <div>
         <Row style={{
           border: '1px solid #f0f0f0',
@@ -544,9 +557,38 @@ export default (props) => {
       </div>
     }
   }
+  //20220626加
+  const renderHaveSelectProcess = () => {
+    if (props.checkTaskVO && props.checkTaskVO.haveSelectProcess === '是') {
+      return <div>
+        <Row style={{
+          border: '1px solid #f0f0f0',
+          background: '#f0f0f0',
+          marginTop: 10
+        }}>
+          <Col span={24 / props.processDefinition.formLayout}>
+            <FormItem label={'选择后续待办流程'} colon={false} style={{ fontWeight: 'bolder' }} />
+          </Col>
+        </Row>
+        <Row style={{
+          border: '1px solid #f0f0f0',
+          paddingTop: 20,
+          marginBottom: 20
+        }} gutter={[8, 16]}>
+          <Col span={24 / props.processDefinition.formLayout}>
+            <FormItem label='后续流程'  name='selectedProcess' required>
+              <Select
+                style={{ width: width }}
+                options={processSelectOptions} />
+            </FormItem>
+          </Col>
+        </Row>
+      </div>
+    }
+  }
   //是否有 意见/备注
   const renderHaveComment = () => {
-    if (props.checkProcessConditionVO && props.checkProcessConditionVO.haveComment === '是') {
+    if (props.checkTaskVO && props.checkTaskVO.haveComment === '是') {
       return <div>
         <Divider style={{ fontSize: 14, lineHeight: 0, paddingTop: 20 }}>以下是审批或处理信息</Divider>
         <Row style={{
@@ -555,7 +597,7 @@ export default (props) => {
           marginTop: 10
         }}>
           <Col span={24 / props.processDefinition.formLayout}>
-            <FormItem label={props.checkProcessConditionVO.commentTitle}
+            <FormItem label={props.checkTaskVO.commentTitle}
               colon={false}
               style={{ fontWeight: 'bolder' }} />
           </Col>
@@ -566,7 +608,7 @@ export default (props) => {
           marginBottom: 20
         }} gutter={[8, 16]}>
           <Col span={24 / props.processDefinition.formLayout}>
-            <FormItem label={props.checkProcessConditionVO.commentTitle} name="comment">
+            <FormItem label={props.checkTaskVO.commentTitle} name="comment">
               <Input.TextArea style={{ width: width }} placeholder="若有其他说明，请在此处填写" />
             </FormItem>
           </Col>
@@ -578,10 +620,12 @@ export default (props) => {
     <Tabs animated={false}>
       <TabPane tab="表单" key="1">
         <FormItem name="asset" style={{ display: 'none' }}><Input /></FormItem>
+        <FormItem name="assetForComputer" style={{ display: 'none' }}><Input /></FormItem>
         {renderFormItem(props.formTree, 1, props.processDefinition.formLayout)}
         {renderHaveOperate()}
         {renderHaveComment()}
         {renderHaveNextUser()}
+        {renderHaveSelectProcess()}
       </TabPane>
       <TabPane tab="流程图" key="2">
         <ProcessGraph record={props.record} />
