@@ -12,14 +12,14 @@ import {
   sysUserPath,
 } from '../../utils';
 import { Dialog } from 'nowrapper/lib/antd';
-import ProcessFormForComplete from '../ProcessDefiniton/ProcessFormForComplete';
+import ProcessFormForComplete from '../ProcessDefiniton/ProcessFormForComplete(暂时没用)';
 import ProcessFormForStart from '../ProcessDefiniton/ProcessFormForStart';
 import Abb from '../ProcessDefiniton/Test';
 import SelectUserGroup from '../ProcessDefiniton/SelectUserGroup';
 import ProcessFormForCheck from '../ProcessDefiniton/ProcessFormForCheck';
 import ProcessFormForModify from '../ProcessDefiniton/ProcessFormForModify';
 import ProcessFormForEndAndStart from '../ProcessDefiniton/ProcessFormForEndAndStart';
-import { Button, message, Modal, Row, Col,  Icon,Tabs } from 'antd';
+import { Button, message, Modal, Row, Col, Icon, Tabs } from 'antd';
 import { Space, LoadingButton } from '../../components';
 import ProcessGraph from '../ProcessDefiniton/ProcessGraph';
 import renderModalForMutex from '../ProcessDefiniton/renderModalForMutex';
@@ -53,7 +53,7 @@ export const onClickForStart = async (record, type) => {
         width: 450,
         content: (
           <SelectUserGroup
-            record={record}
+            record={record} //仅用于判断是不是“代理流程”
             userVL={userVL}
             groupTreeForSelect={groupTreeForSelect} //20220712 可能无值：也无妨
           />
@@ -70,10 +70,24 @@ export const onClickForStart = async (record, type) => {
               committerIdStr = values.committerIdStr;
             }
           }
-          //20220712 todo 添加代理流程在Start.form加载前的数据的数据准备：把下面的record.id给换成所代理的子流程的oid
-          //todo试试record.id能不能直接改！？
-
-          record.id = 283;
+          let processNameForEntity, processForEntity
+          if (record.integrationMode === '代理流程') {
+            processNameForEntity =
+              values.assetType + record.processType + '流程'; //组织实体流程名：这里对流程命名规则有了约定
+           processForEntity = await ajax.get(
+              processDefinitionPath.getByName,
+              {
+                processDefinitionName: processNameForEntity,
+              },
+            );
+            if (!processForEntity) {
+              Modal.error({
+                content: processNameForEntity + '不存在，请联系管理员！',
+              });
+              return;
+            }
+            record.id = processForEntity.id
+          }
           //可见的字段组
           const data = await ajax.get(
             processFormTemplatePath.getSelectGroupIdList,
@@ -110,7 +124,7 @@ export const onClickForStart = async (record, type) => {
             },
           );
           Dialog.show({
-            title: record.processName,
+            title: processForEntity?processNameForEntity:record.processName,
             footerAlign: 'right',
             locale: 'zh',
             enableValidate: true,
@@ -122,7 +136,7 @@ export const onClickForStart = async (record, type) => {
                     //20211205仅需要SelectUserGroup返回的values里的committerType(是否是代人申请)/committerName（代人申请时有值，格式是那种“拼接长串”）
                     userInfo={values} //仅用于传给formItemValidate作检验用
                     changeColumnIdLableMap={changeColumnIdLableMap}
-                    record={record}
+                    record={processForEntity?processForEntity:record}
                     formTree={formTree}
                     tableTypeVO={tableTypeVO}
                     selectGroupIdArr={selectGroupIdArr}
@@ -343,23 +357,28 @@ export const onClickForMy = async (record, list) => {
   const operateArr = await ajax.get(sysDicPath.getDicValueList, {
     flag: '操作类型',
   });
-  let recordOld
+  let recordOld;
   if (record.preProcessInstanceId) {
     recordOld = await ajax.get(processInstanceDataPath.get, {
-     id: record.preProcessInstanceId,
+      id: record.preProcessInstanceId,
     });
   }
   if (processDefinition && processFormValue1 && formTree && checkTaskVO) {
     Dialog.show({
-      title:recordOld?<div>
-      {record.processName}——编号:{record.id}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注：本流程关联前置流程
-      <a onClick={() => onClickForCurrent(recordOld)}>
-        {recordOld.processName}
-      </a>
-      ,点击查看详情
-    </div>:<div>
-      {record.processName}——编号:{record.id}
-    </div>,
+      title: recordOld ? (
+        <div>
+          {record.processName}——编号:{record.id}
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注：本流程关联前置流程
+          <a onClick={() => onClickForCurrent(recordOld)}>
+            {recordOld.processName}
+          </a>
+          ,点击查看详情
+        </div>
+      ) : (
+        <div>
+          {record.processName}——编号:{record.id}
+        </div>
+      ),
       footerAlign: 'right',
       locale: 'zh',
       enableValidate: true,

@@ -48,7 +48,7 @@ const formRule = {
             delete values[key]
           })
           obj[columnName] = JSON.stringify(obj2)
-          Object.assign(obj, values)
+          Object.assign(obj, values)//浅拷贝
         }
         return obj
       }

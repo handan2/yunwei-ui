@@ -10,10 +10,8 @@ import {
 export default (props) => {
   console.log('20220711')
   console.log(props)
-  
   const [core] = useState(new FormCore())
   const [checkedKeys, setCheckedKeys] = useState()
-
   const onCheck = (checkedKeys) => {
     setCheckedKeys(checkedKeys)
     if (checkedKeys.length > 0) {
@@ -22,17 +20,15 @@ export default (props) => {
       core.setValue('checkGroupIdArr', null)
     }
   }
-
   const [options, setOptions] = useState([])
   const [asTypeLVOptions, setAsTypeLVOOptions] = useState()
-
   useEffect(async () => {
 
     //core.reset()
     core.setValue('committerType', '给本人申请')
 
     const asTypeLV = await ajax.get(
-      asTypePath.getLevelTwoAsTypeLV
+      asTypePath.getLevelTwoInFoAssetAsTypeLV
     );
     if (asTypeLV) setAsTypeLVOOptions(asTypeLV)
 
@@ -91,7 +87,7 @@ export default (props) => {
       </FormItem>
     }
     {  
-      props.record.integrationMode === '代理流程' && <FormItem label='选择设备类型:' defaultValue = '计算机' >
+      props.record.integrationMode === '代理流程' && <FormItem name="assetType"  label='选择设备类型:' defaultValue = '计算机' >
       <Select 
           options={asTypeLVOptions} />
       </FormItem>

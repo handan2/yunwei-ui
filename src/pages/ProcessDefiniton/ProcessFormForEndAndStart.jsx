@@ -31,9 +31,6 @@ export default (props) => {
   console.log('20220702   ------------')
   console.log(props)
   const [core] = useState(new FormCore());
-  //表类型中资产设备真实的数据 <自定义表id,as_id>
-  const [assetMap, setAssetMap] = useState(new Map());
-  const [assetParam, setAssetParam] = useState();
   const [roleArr, setRoleArr] = useState();
   const [userTree, setUserTree] = useState();
   //const [hasChangeDisk, setHasChangeDisk] = useState(false);//20220617 变为true的条件：变更字段里有“硬盘” && 资产已选择
@@ -59,10 +56,6 @@ export default (props) => {
       const data2 = await ajax.get(sysDeptPath.getDeptUserTree);
       data2 && setUserTree(data2);
     }
-    const data3 = await ajax.get(asTypePath.getAsTypeIdByName, {
-      name: props.record.processType2,
-    }); //20211110
-    data3 && setAssetParam({ typeId: data3 });
     //20211205 部分表单项（如用户相关信息）添加
     formItemAutoComplete(props.changeColumnIdLableMap, core, props.userInfo)
 
@@ -75,6 +68,13 @@ export default (props) => {
       repeater: { asyncHandler }
     })
     core.setValues('diskChangeDec', '')
+    if (props.tableTypeVO) {//20220715  
+      let str = JSON.stringify(props.tableTypeVO)
+      if (str.indexOf('硬盘变更') != -1) //这里对表单字段命名加了约定
+        hasChangeDisk = true
+      else
+        hasChangeDisk = false
+    }
   }, []);
 
 
@@ -91,14 +91,14 @@ export default (props) => {
       <Table.Column title="容量(GB)" dataIndex="price" />
       <Table.Column title="密级" dataIndex="miji" />
       <Table.Column title="状态" dataIndex="state" />
-      <Table.Column title="变更类型" dataIndex="flag" style={{ color: 'red' }} render={(value, record) => {
-        return value ? <span style={{ color: 'red' }}>{value}</span> : <span>---</span>;
-      }} />
+      { repeaterModify && <Table.Column title="变更类型" dataIndex="flag" style={{ color: 'red' }}   render={(value, record) => {
+            return value ? <span  style={{ color: 'red' }}>{value}</span> : <span>---</span>;
+        }}/>}
       <Table.Column title="操作" render={(value, record, index) => {
-        return <div>
+        return  repeaterModify?<div>
           <ActionButton core={coreList[index]} type="update"><Button size="small">编辑</Button></ActionButton>
           {/* <ActionButton core={coreList[index]} type="delete"><Button size="small">Remove</Button></ActionButton> */}
-        </div>;
+        </div>:<>---</> ;
       }} />
     </Table>
   }
@@ -205,55 +205,6 @@ export default (props) => {
       console.log(core.getValues().diskListForHisForProcess)
     }
   }
-  const selectAsset = async (item) => {
-
-    Dialog.show({
-      title: '选择资产',
-      footerAlign: 'label',
-      locale: 'zh',
-      enableValidate: true,
-      width: 800,
-      content: <AsDeviceCommonQuery params={assetParam} />,
-      onOk: async (values, hide) => {
-        if (!values.asDeviceCommonId) {
-          message.error('选择一个资产');
-          return;
-        }
-        console.log('选择完资产')
-        console.log(values)
-        core.setValues('assetForComputer', values.asDeviceCommon)
-        const customTableId = parseInt(item.name.split('.')[0]);
-        const data = await ajax.get(
-          processFormTemplatePath.getTableTypeInstData,//获取资产号对应的自定义表中的相应字段值数据
-          {
-            customTableId: customTableId,
-            asDeviceCommonId: values.asDeviceCommonId,
-            processDefinitionId: props.record.id,
-          },
-        );
-        if (data) {
-          core.setValues(data.map);
-          core.setValues('repeater', { dataSource: data.diskList })
-          core.setValues('diskListForHisForProcess', data.diskList)
-          // console.log('选择资产后')
-          //  console.log(core.getValues().diskListForHisForProcess)
-          if (hasChangeDisk)//数据加载了，那个hasADD等状态开关才能放开
-            setRepeaterModify(true)
-          let tmpMap = _.cloneDeep(assetMap);
-          tmpMap.set(customTableId, values.asDeviceCommonId);
-          setAssetMap(tmpMap);
-          //
-          let assetArr = [];
-          tmpMap.forEach((value, key) => {
-            assetArr.push({ customTableId: key, asId: value });
-          });
-          core.setValue('asset', assetArr);
-          hide();
-        }
-      },
-    });
-  };
-
   /*
     formTree:表单树
     level:字段组递归的层次，方便缩进
@@ -342,53 +293,6 @@ export default (props) => {
             {props.tableTypeVO &&
               props.tableTypeVO[item.type.split('.')[0]].map(
                 (itemm, index, arr) => {
-                  // if (index === 0) {
-                  //   return (
-                  //     <Col span={24 / colNum}>
-                  //       <FormItem label={itemm.label.split('.')[1]} required>
-                  //         <div>
-                  //           {/* <FormItem
-                  //             name={itemm.name + 'ErrMsg'}
-                  //             style={{ display: 'none' }}
-                  //           >
-                  //             <Input />
-                  //           </FormItem> */}
-                  //           <Item
-                  //             name={itemm.name}
-                  //             validateConfig={{
-                  //               operatorType: 'string',
-                  //               required: true,
-                  //               message: itemm.label.split('.')[1] + '不能为空',
-                  //             }}
-                  //           >
-                  //             <Input
-                  //               disabled
-                  //               style={{ width: width, marginRight: 5 }}
-                  //             />
-                  //           </Item>
-                  //           <a
-                  //             style={{ fontSize: 15 }}
-                  //             onClick={() => selectAsset(itemm)}
-                  //           >
-                  //             选择
-                  //           </a>
-                  //           <Item
-                  //             render={(values, context) => {
-                  //               if (values[itemm.name + 'ErrMsg']) {
-                  //                 return (
-                  //                   <div style={{ color: 'red' }}>
-                  //                     {values[itemm.name + 'ErrMsg']}
-                  //                   </div>
-                  //                 );
-                  //               }
-                  //               return null;
-                  //             }}
-                  //           />
-                  //         </div>
-                  //       </FormItem>
-                  //     </Col>
-                  //   );
-                  // } else {
                   if (itemm.label.split('.')[1] === '硬盘信息（用于渲染）')
                     return (<>
                       <Col span={24} style={{ background: '#f0f0f0', fontWeight: 'bolder', padding: 0, margin: 0, border: '1px solid #f0f0f0' }}>
@@ -397,7 +301,7 @@ export default (props) => {
                       </Col>
                       <Col span={24} style={{ padding: 0, margin: 0, }}>
                         <FormItem name="repeater" layout={{ label: 2, control: 22 }}>
-                          <SelectTableRepeater style={{ width: '100%' }} width={'100%'} locale='zh' hasAdd={repeaterModify} hasDelete={false} hasUpdate={repeaterModify} view={renderView}>
+                          <SelectTableRepeater style={{ width: '100%' }} width={'100%'} locale='zh' hasAdd={repeaterModify}  view={renderView}>
                             <FormItem label='序列号' status={(values, core) => {
                                 return (values.flag ==='新增' || values.flag===undefined)? 'edit':'disabled'  //刚点新增按钮弹出的界面，flag是undefined
                             }} name='sn' required validateConfig={{ type: 'string', required: true, message: '必填项' }}><Input style={{ width: '100px' }}  placeholder='若实物未购置，请填“待定”'/></FormItem>
@@ -411,14 +315,14 @@ export default (props) => {
                           </SelectTableRepeater>
                         </FormItem>
                       </Col>
-                      <Col span={24} >
-                        <FormItem layout={{ label: 4, control: 20 }}
-                          label='变更情况' name='diskChangeDec'  >
-                          {/* 因在effect里初始置空串，所以不能用defaultValue*/}
-                          <Input disabled style={{ width: width * 3.5, fontWeight: 'bolder', color: 'red' }} placeholder='无变更' />
-                        </FormItem>
-                      </Col>
-
+                      {hasChangeDisk && <Col span={24} >
+                          <FormItem layout={{ label: 4, control: 20 }}
+                            label='变更情况' name='diskChangeDec'  >
+                            {/* 因在effect里初始置空串，所以不能用defaultValue*/}
+                            <Input disabled style={{ width: width * 3.5, fontWeight: 'bolder', color: 'red' }} placeholder='无变更' />
+                          </FormItem>
+                        </Col>
+                        }
                     </>
                     )
                   else
@@ -436,14 +340,17 @@ export default (props) => {
           </Row>,
         );
       } else {
-        tmpArr.push(<Col span={24 / colNum}>{getFormItem(item, core)}</Col>);
-        if (tmpArr.length === colNum) {
-          resultArr.push(<Row gutter={[8, 16]}>{tmpArr}</Row>);
-          tmpArr = [];
-        }
-        if (item.label.indexOf('硬盘变更')) {
-          //setHasChangeDisk(true)//20220618  在组件创建时的渲染过程，不能使用SetState:会导致一直不停渲染
-          hasChangeDisk = true;
+        if (item.label.indexOf('硬盘变更')!=-1) {
+          console.log('indexOf(硬盘变更)!=-1')
+          console.log(item.label)
+          //setHasChangeDisk(true)//20220618  在组件创建时的渲染过程(20220714 函数组件每次渲染必经的“主执行过程”路上)，不能使用SetState:会导致一直不停渲染
+          //hasChangeDisk = true;//20220714 这种方式同样有一个问题：因为变量不会引发自动渲染，在此语句执行之前的语句是获取不到这个值的
+        }else{
+          tmpArr.push(<Col span={24 / colNum}>{getFormItem(item, core)}</Col>);
+          if (tmpArr.length === colNum) {
+            resultArr.push(<Row gutter={[8, 16]}>{tmpArr}</Row>);
+            tmpArr = [];
+          }
         }
       }
     });

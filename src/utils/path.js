@@ -54,7 +54,7 @@ export const accountPath= {
 export const asTypePath = {
   getAsTypeIdByName:contextPath + '/asType/getAsTypeIdByName',
   getAllowedAsTypeIdByProDefId:contextPath + '/asType/getAllowedAsTypeIdByProDefId',
-  getLevelTwoAsTypeLV:contextPath + '/asType/getLevelTwoAsTypeLV',
+  getLevelTwoInFoAssetAsTypeLV:contextPath + '/asType/getLevelTwoInFoAssetAsTypeLV',
 
 }
 //审计日志
