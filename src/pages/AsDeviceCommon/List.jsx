@@ -107,7 +107,8 @@ export default () => {
         width='75%'
       >
         <iframe
-          src={"http://10.84.10.17:8888/webroot/decision/view/report?viewlet=test/lifeCircle.cpt&assert_no=" + assert_no}
+          //src={"http://10.84.10.17:8888/webroot/decision/view/report?viewlet=test/lifeCircle.cpt&assert_no=" + assert_no}
+          src={"http://localhost:8075/webroot/decision/view/report?viewlet=test/lifeCircle.cpt&assert_no=" + assert_no}
           width="100%"
           height="800px"
           frameborder="no"

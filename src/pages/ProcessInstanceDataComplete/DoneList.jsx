@@ -66,7 +66,7 @@ export default () => {
         ) : (
           <a onClick={() => showModal(record)}>评分</a>
         )}
-        {/* <a onClick={() => onClickForPrint()}>打印</a> */}
+        <a onClick={() => onClickForPrint()}>打印</a>
       </Space>
     );
   };
@@ -90,7 +90,7 @@ export default () => {
           />
           <Table.Column title="提交人" width="60px" dataIndex="displayName" />
           {/* <Table.Column title="提交部门" dataIndex="deptName"/> */}
-          {/* <Table.Column title="当前步骤" ellipsis={true}  dataIndex="displayCurrentStep"/> */}
+          <Table.Column title="当前步骤" ellipsis={true}  dataIndex="processStatus"/>
           <Table.Column
             title="提交时间"
             ellipsis={true}
@@ -128,7 +128,8 @@ export default () => {
         width={750}
       >
         <iframe
-          src="http://10.84.10.17:8888/webroot/decision/view/report?viewlet=test/lifeCircle.cpt"
+          //src="http://10.84.10.17:8888/webroot/decision/view/report?viewlet=test/lifeCircle.cpt"
+          src="http://localhost:8075/webroot/decision/view/report?viewlet=lifeCircle.cpt"
           width="700"
           height="400px"
           frameborder="no"

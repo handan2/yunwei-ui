@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Form, { FormCore, FormItem } from 'noform'
 import { Card, Col, Row, Tabs } from 'antd'
-import { ajax, asDeviceCommonPath, sysDeptPath } from '../../utils'
+import { ajax, asDeviceCommonPath, sysDeptPath,asTypePath } from '../../utils'
 import { DatePicker, Input, InputNumber, Radio, TreeSelect } from 'nowrapper/lib/antd'
 import locale from 'antd/lib/date-picker/locale/zh_CN'
 import ProcessInstanceChangeList from '../ProcessInstanceChange/List'
@@ -26,7 +26,7 @@ export default (props) => {
   const [deptUserTreeSelectData, setDeptUserTreeSelectData] = useState()
 
   useEffect(async () => {
-    const data = await ajax.get(asDeviceCommonPath.getAsTypeTree)
+    const data = await ajax.get(asTypePath.getAsTypeTree)
     if (data) {
       setTreeData(data)
     }

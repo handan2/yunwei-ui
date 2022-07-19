@@ -17,7 +17,8 @@ import {
   sysUserPath,
   width,
   asTypePath,
-  formItemAutoComplete
+  formItemAutoComplete,
+  session
 } from '../../utils';
 import getFormItem from './getFormItem';
 import AsDeviceCommonQuery from './AsDeviceCommonQuery';
@@ -27,13 +28,14 @@ import CheckUserTransfer from './CheckUserTransfer';
 
 //p20220715这个逻辑有问题
 let hasChangeDisk = false;//20220618 文件中的这个变量生命周期：直到浏览器URL重新刷新：只是把原页面在界面上关闭不会消亡
+
 export default (props) => {
   console.log('process start 渲染了hasChangeDisk的值：')
   console.log(hasChangeDisk)
+
   const [core] = useState(new FormCore());
   //表类型中资产设备真实的数据 <自定义表id,as_id>
   const [assetMap, setAssetMap] = useState(new Map());
-  const [assetParam, setAssetParam] = useState();
   const [roleArr, setRoleArr] = useState();
   const [userTree, setUserTree] = useState();
   //const [hasChangeDisk, setHasChangeDisk] = useState(false);//20220617 变为true的条件：变更字段里有“硬盘” && 资产已选择
@@ -50,10 +52,6 @@ export default (props) => {
       const data2 = await ajax.get(sysDeptPath.getDeptUserTree);
       data2 && setUserTree(data2);
     }
-    const data3 = await ajax.get(asTypePath.getAsTypeIdByName, {
-      name: props.record.processType2,
-    }); //20211110
-    data3 && setAssetParam({ typeId: data3 });
     //20211205 部分表单项（如用户相关信息）添加
     formItemAutoComplete(props.changeColumnIdLableMap, core, props.userInfo)
 
@@ -66,15 +64,47 @@ export default (props) => {
       repeater: { asyncHandler }
     })
     core.setValues('diskChangeDec', '')
-    if (props.tableTypeVO) {//20220715  
-      let str = JSON.stringify(props.tableTypeVO)
-      if (str.indexOf('硬盘变更') != -1) //这里对表单字段命名加了约定
+    if (props.formTree) {//20220715  
+      let str = JSON.stringify(props.formTree)
+      if (str.indexOf('硬盘变更') != -1) {//这里对表单字段命名加了约定
         hasChangeDisk = true
+      }
       else
         hasChangeDisk = false
     }
   }, []);
 
+  const renderDisk = () => <>
+    <Col span={24} style={{ background: '#f0f0f0', fontWeight: 'bolder', padding: 0, margin: 0, border: '1px solid #f0f0f0' }}>
+      <FormItem layout={{ label: 4, control: 20 }} style={{ fontWeight: 'bolder' }} label={hasChangeDisk ? '硬盘变更（可选）' : '硬盘信息'}>
+      </FormItem>
+    </Col>
+    <Col span={24} style={{ padding: 0, margin: 0, }}>
+      <FormItem name="repeater" layout={{ label: 2, control: 22 }}>
+        <SelectTableRepeater style={{ width: '100%' }} width={'100%'} locale='zh' hasAdd={repeaterModify} view={renderView}>
+          <FormItem label='序列号' status={(values, core) => {
+            return (values.flag === '新增' || values.flag === undefined) ? 'edit' : 'disabled'  //刚点新增按钮弹出的界面，flag是undefined
+          }} name='sn' required validateConfig={{ type: 'string', required: true, message: '必填项' }}><Input style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”' /></FormItem>
+          <FormItem label='型号' name='model' required validateConfig={{ type: 'string', required: true, message: '必填项' }}><Input style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”' /></FormItem>
+          <FormItem label="容量（GB）" name="price" validateConfig={{ type: 'number', required: true, message: '必填项' }}><InputNumber style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”' /></FormItem>
+          <FormItem label="密级" name="miji"><Input style={{ width: '100px' }} placeholder='自动填充' disabled /></FormItem>
+          <FormItem status={(values, core) => {
+            return values.hostAsId ? 'edit' : 'disabled'
+          }} label='状态' name='state' defaultValue='在用' ><RadioGroup style={{ width: 200 }} options={diskStateOptions} /></FormItem>
+          <FormItem label="主机ID" name="hostAsId" ><InputNumber style={{ width: '100px' }} placeholder='自动填充' disabled /></FormItem>
+        </SelectTableRepeater>
+      </FormItem>
+    </Col>
+    {/* 20220714 hasChangeDisk对下面的控制 */}
+    {hasChangeDisk && <Col span={24} >
+      <FormItem layout={{ label: 4, control: 20 }}
+        label='变更情况' name='diskChangeDec'  >
+        {/* 因在effect里初始置空串，所以不能用defaultValue*/}
+        <Input disabled style={{ width: width * 3.5, fontWeight: 'bolder', color: 'red' }} placeholder='无变更' />
+      </FormItem>
+    </Col>
+    }
+  </>
 
   const renderView = (_, ctx) => {
     const dataSource = ctx.getDataSource();
@@ -204,14 +234,15 @@ export default (props) => {
     }
   }
   const selectAsset = async (item) => {
-
+    const customTableId = parseInt(item.name.split('.')[0]);//20220716
+    const assetParams = { customTableId: customTableId, userDeptId: session.getItem('user').deptId }
     Dialog.show({
       title: '选择资产',
       footerAlign: 'label',
       locale: 'zh',
       enableValidate: true,
       width: 800,
-      content: <AsDeviceCommonQuery params={assetParam} />,
+      content: <AsDeviceCommonQuery params={assetParams} />,
       onOk: async (values, hide) => {
         if (!values.asDeviceCommonId) {
           message.error('选择一个资产');
@@ -220,7 +251,7 @@ export default (props) => {
         console.log('选择完资产')
         console.log(values)
         core.setValues('assetForComputer', values.asDeviceCommon)
-        const customTableId = parseInt(item.name.split('.')[0]);
+
         const data = await ajax.get(
           processFormTemplatePath.getTableTypeInstData,//获取资产号对应的自定义表中的相应字段值数据
           {
@@ -269,16 +300,83 @@ export default (props) => {
           _.indexOf(props.selectGroupIdArr, item.id) >= 0
           && _.indexOf(hideGroupLabelArr, item.label) < 0
         ) {
+
+          if (item.label.indexOf('网络配置') != -1) {//约定了“网络配置”，不显示这个分组的情况  
+            console.log('20220719  indexOf(网络配置)!=-1')
+            console.log(props.record.processName)
+            console.log(props.connectTypForAff)
+            if (props.connectTypForAff.indexOf('直连网络') === -1 && props.record.processName.indexOf('外设、声像及办公自动化申领') != -1) {
+              console.log('进入网络配置隐藏分支')
+              return
+            }
+
+          } else if (item.label.indexOf('上位机策略') != -1) {//约定了“上位机策略”，不显示这个分组的情况  
+            if (props.connectTypForAff.indexOf('连接计算机') === -1 && props.record.processName.indexOf('外设、声像及办公自动化申领') != -1) {
+              return
+            }
+
+          }
+          else if (item.label.indexOf('三合一策略') != -1) {//约定了“网络配置”，不显示这个分组的情况  
+            if (props.connectTypForAff.indexOf('连接计算机') === -1 && props.record.processName.indexOf('外设、声像及办公自动化申领') != -1) {
+              return
+            }
+
+          }
+
+            resultArr.push(
+              <Row
+                style={{
+                  border: '1px solid #f0f0f0',
+                  background: '#f0f0f0',
+                  marginTop: -10,
+                  marginLeft: (level - 1) * 100,
+                  marginRight: (level - 1) * 100,
+                  //仅仅是隐藏时，必填项还是会判断
+                  //   display:_.indexOf(hideGroupLabelArr,item.label)>= 0?'none':'block'
+                }}
+              >
+                <Col span={24 / colNum}>
+                  <FormItem
+                    label={item.label}
+                    colon={false}
+                    style={{ fontWeight: 'bolder' }}
+                  />
+                </Col>
+              </Row>,
+            );
+            resultArr.push(
+              <Row
+                style={{
+                  border: '1px solid #f0f0f0',
+                  paddingTop: 20,
+                  paddingBottom: 10,
+                  marginBottom: 20,
+                  marginLeft: (level - 1) * 100,
+                  marginRight: (level - 1) * 100,
+                  // display:_.indexOf(hideGroupLabelArr,item.label)>= 0?'none':'block'
+                }}
+              >
+                {renderFormItem(item.children, level + 1, item.groupLayout)}
+              </Row>,
+            );
+          
+        }
+      } else if (item.flag === '表类型') {
+        if (item.label.indexOf('上位机信息') != -1) {//约定了“上位机信息”，不显示这个分组的情况  
+          console.log('20220719  indexOf(上位机)!=-1')
+          console.log(props.connectTypForAff)
+          if (props.connectTypForAff.indexOf('连接计算机') === -1 && props.record.processName.indexOf('外设、声像及办公自动化申领') != -1) {
+              return
+          }
+        } 
           resultArr.push(
             <Row
               style={{
                 border: '1px solid #f0f0f0',
                 background: '#f0f0f0',
-                marginTop: -10,
+                marginTop: 10,
                 marginLeft: (level - 1) * 100,
                 marginRight: (level - 1) * 100,
-                //仅仅是隐藏时，必填项还是会判断
-                //   display:_.indexOf(hideGroupLabelArr,item.label)>= 0?'none':'block'
               }}
             >
               <Col span={24 / colNum}>
@@ -295,152 +393,86 @@ export default (props) => {
               style={{
                 border: '1px solid #f0f0f0',
                 paddingTop: 20,
-                paddingBottom: 10,
                 marginBottom: 20,
                 marginLeft: (level - 1) * 100,
                 marginRight: (level - 1) * 100,
-                // display:_.indexOf(hideGroupLabelArr,item.label)>= 0?'none':'block'
               }}
+              gutter={[8, 16]}
             >
-              {renderFormItem(item.children, level + 1, item.groupLayout)}
-            </Row>,
-          );
-        }
-      } else if (item.flag === '表类型') {
-        resultArr.push(
-          <Row
-            style={{
-              border: '1px solid #f0f0f0',
-              background: '#f0f0f0',
-              marginTop: 10,
-              marginLeft: (level - 1) * 100,
-              marginRight: (level - 1) * 100,
-            }}
-          >
-            <Col span={24 / colNum}>
-              <FormItem
-                label={item.label}
-                colon={false}
-                style={{ fontWeight: 'bolder' }}
-              />
-            </Col>
-          </Row>,
-        );
-        resultArr.push(
-          <Row
-            style={{
-              border: '1px solid #f0f0f0',
-              paddingTop: 20,
-              marginBottom: 20,
-              marginLeft: (level - 1) * 100,
-              marginRight: (level - 1) * 100,
-            }}
-            gutter={[8, 16]}
-          >
-            {props.tableTypeVO &&
-              props.tableTypeVO[item.type.split('.')[0]].map(
-                (itemm, index, arr) => {
-                  if (index === 0) {
-                    return (
-                      <Col span={24 / colNum}>
-                        <FormItem label={itemm.label.split('.')[1]} required>
-                          <div>
-                            {/* <FormItem
+              {props.tableTypeVO &&
+                props.tableTypeVO[item.type.split('.')[0]].map(
+                  (itemm, index, arr) => {
+                    if (index === 0) {
+                      return (
+                        <Col span={24 / colNum}>
+                          <FormItem label={itemm.label.split('.')[1]} required>
+                            <div>
+                              {/* <FormItem
                               name={itemm.name + 'ErrMsg'}
                               style={{ display: 'none' }}
                             >
                               <Input />
                             </FormItem> */}
-                            <Item
-                              name={itemm.name}
-                              validateConfig={{
-                                operatorType: 'string',
-                                required: true,
-                                message: itemm.label.split('.')[1] + '不能为空',
-                              }}
-                            >
-                              <Input
-                                disabled
-                                style={{ width: width, marginRight: 5 }}
+                              <Item
+                                name={itemm.name}
+                                validateConfig={{
+                                  operatorType: 'string',
+                                  required: true,
+                                  message: itemm.label.split('.')[1] + '不能为空',
+                                }}
+                              >
+                                <Input
+                                  disabled
+                                  style={{ width: width, marginRight: 5 }}
+                                />
+                              </Item>
+                              <a
+                                style={{ fontSize: 15 }}
+                                onClick={() => selectAsset(itemm)}
+                              >
+                                选择
+                              </a>
+                              <Item
+                                render={(values, context) => {
+                                  if (values[itemm.name + 'ErrMsg']) {
+                                    return (
+                                      <div style={{ color: 'red' }}>
+                                        {values[itemm.name + 'ErrMsg']}
+                                      </div>
+                                    );
+                                  }
+                                  return null;
+                                }}
                               />
-                            </Item>
-                            <a
-                              style={{ fontSize: 15 }}
-                              onClick={() => selectAsset(itemm)}
-                            >
-                              选择
-                            </a>
-                            <Item
-                              render={(values, context) => {
-                                if (values[itemm.name + 'ErrMsg']) {
-                                  return (
-                                    <div style={{ color: 'red' }}>
-                                      {values[itemm.name + 'ErrMsg']}
-                                    </div>
-                                  );
-                                }
-                                return null;
-                              }}
-                            />
-                          </div>
-                        </FormItem>
-                      </Col>
-                    );
-                  } else {
-                    if (itemm.label.split('.')[1] === '硬盘信息（用于渲染）')
-                      return (<>
-                        <Col span={24} style={{ background: '#f0f0f0', fontWeight: 'bolder', padding: 0, margin: 0, border: '1px solid #f0f0f0' }}>
-                          <FormItem layout={{ label: 4, control: 20 }} style={{ fontWeight: 'bolder' }} label={hasChangeDisk ? '硬盘变更（可选）' : '硬盘信息'}>
-                          </FormItem>
-                        </Col>
-                        <Col span={24} style={{ padding: 0, margin: 0, }}>
-                          <FormItem name="repeater" layout={{ label: 2, control: 22 }}>
-                            <SelectTableRepeater style={{ width: '100%' }} width={'100%'} locale='zh' hasAdd={repeaterModify} view={renderView}>
-                              <FormItem label='序列号' status={(values, core) => {
-                                return (values.flag === '新增' || values.flag === undefined) ? 'edit' : 'disabled'  //刚点新增按钮弹出的界面，flag是undefined
-                              }} name='sn' required validateConfig={{ type: 'string', required: true, message: '必填项' }}><Input style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”' /></FormItem>
-                              <FormItem label='型号' name='model' required validateConfig={{ type: 'string', required: true, message: '必填项' }}><Input style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”' /></FormItem>
-                              <FormItem label="容量（GB）" name="price" validateConfig={{ type: 'number', required: true, message: '必填项' }}><InputNumber style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”' /></FormItem>
-                              <FormItem label="密级" name="miji"><Input style={{ width: '100px' }} placeholder='自动填充' disabled /></FormItem>
-                              <FormItem status={(values, core) => {
-                                return values.hostAsId ? 'edit' : 'disabled'
-                              }} label='状态' name='state' defaultValue='在用' ><RadioGroup style={{ width: 200 }} options={diskStateOptions} /></FormItem>
-                              <FormItem label="主机ID" name="hostAsId" ><InputNumber style={{ width: '100px' }} placeholder='自动填充' disabled /></FormItem>
-                            </SelectTableRepeater>
-                          </FormItem>
-                        </Col>
-                        {/* 20220714 hasChangeDisk对下面的控制 */}
-                        {hasChangeDisk && <Col span={24} >
-                          <FormItem layout={{ label: 4, control: 20 }}
-                            label='变更情况' name='diskChangeDec'  >
-                            {/* 因在effect里初始置空串，所以不能用defaultValue*/}
-                            <Input disabled style={{ width: width * 3.5, fontWeight: 'bolder', color: 'red' }} placeholder='无变更' />
-                          </FormItem>
-                        </Col>
-                        }
-                      </>
-                      )
-                    else
-                      return (
-                        <Col span={24 / colNum}>
-                          <FormItem
-                            label={itemm.label.split('.')[1]} name={itemm.name} >
-                            <Input disabled style={{ width: width }} />
+                            </div>
                           </FormItem>
                         </Col>
                       );
-                  }
-                },
-              )}
-          </Row>,
-        );
+                    } else {
+                      if (itemm.label.split('.')[1] === '硬盘信息（用于渲染）')
+                        return renderDisk()
+                      else
+                        return (
+                          <Col span={24 / colNum}>
+                            <FormItem
+                              label={itemm.label.split('.')[1]} name={itemm.name} >
+                              <Input disabled style={{ width: width }} />
+                            </FormItem>
+                          </Col>
+                        );
+                    }
+                  },
+                )}
+            </Row>,
+          );
+        
       } else {//20220714
         if (item.label.indexOf('硬盘变更') != -1) {//不渲染
-          console.log('indexOf(硬盘变更)!=-1')
+          console.log('20220719  indexOf(硬盘变更)!=-1')
           console.log(item.label)
           //setHasChangeDisk(true)//20220618  在组件创建时的渲染过程(20220714 函数组件每次渲染必经的“主执行过程”路上)，不能使用SetState:会导致一直不停渲染
           //hasChangeDisk = true;//20220714 这种方式同样有一个问题：因为变量不会引发自动渲染，在此语句执行之前的语句是获取不到这个值的
-        
+
         } else {
           tmpArr.push(<Col span={24 / colNum}>{getFormItem(item, core)}</Col>);
           if (tmpArr.length === colNum) {

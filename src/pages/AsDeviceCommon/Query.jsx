@@ -2,7 +2,7 @@ import Form, { FormCore, FormItem } from 'noform'
 import { AutoComplete, Input, Select, TreeSelect } from 'nowrapper/lib/antd'
 import { Button, Col, Row } from 'antd'
 import React, { useEffect, useState } from 'react'
-import { ajax, asDeviceCommonPath, sysDeptPath } from '../../utils'
+import { ajax, asDeviceCommonPath, sysDeptPath,asTypePath } from '../../utils'
 import { Space } from '../../components'
 
 const core = new FormCore()
@@ -41,7 +41,7 @@ export default (props) => {
       setNoOption(data)
       setNoOptionTmp(data)
     }
-    const data2 = await ajax.get(asDeviceCommonPath.getAsTypeTree)
+    const data2 = await ajax.get(asTypePath.getAsTypeTree)
     data2 && setTypeData(data2)
     const data3 = await ajax.get(sysDeptPath.getDeptTree)
     data3 && setDeptData(data3)

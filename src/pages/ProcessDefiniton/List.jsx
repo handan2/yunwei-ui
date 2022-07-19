@@ -24,7 +24,7 @@ import Form1 from './Form1'
 import Form2 from './Form2'
 import Form3 from './Form3'
 import ProcessFormForStart from './ProcessFormForStart'
-import SelectUserGroup from './SelectUserGroup'
+import SelectOptionForm from './SelectOptionForm'
 import { onClickForStart } from '../ProcessInstanceData/onClick';
 
 /* 张：这是form3的回调函数
@@ -149,8 +149,8 @@ export default () => {
       <OperateButton path={processDefinitionPath} />
       <Table>
         <Table.Column title="流程名称" dataIndex="processName" />
-        <Table.Column title="资产分类" dataIndex="processType2" />
         <Table.Column title="事件分类" dataIndex="processType" />
+        <Table.Column title="事件分类2" dataIndex="processType2" />
         <Table.Column title="描述" dataIndex="description" />
         <Table.Column title="操作" render={renderListButton} />
       </Table>

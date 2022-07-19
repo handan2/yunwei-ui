@@ -14,13 +14,8 @@ import {
   listFormatBefore,
   listFormatAfter,
   processDefinitionPath,
-  processFormTemplatePath,
-  processInstanceDataPath,
-  sysUserPath,
 } from '../../utils';
 import { QueryCondition, Space, LoadingButton } from '../../components';
-import ProcessFormForStart from './ProcessFormForStart';
-import SelectUserGroup from './SelectUserGroup';
 
 //这是form3的回调函数
 let getForm3DataFunction;
@@ -39,7 +34,7 @@ export default (props) => {
             locale: 'zh',
             enableValidate: true,
             width: 1000,
-            content: <DefList />
+            content: <DefList isDialog = {true}/>
             //content: <ListForHome />
           })
         }}>more</a> : <div />}
@@ -68,8 +63,8 @@ export default (props) => {
           size={props.isHome ? "small" : ""}
         >
           <Table.Column title="流程名称" dataIndex="processName" />
-          <Table.Column title="资产分类" dataIndex="processType2" />
-          <Table.Column title="事件分类" dataIndex="processType" />
+          <Table.Column title="流程分类" dataIndex="processType" />
+          {props.isDialog && <Table.Column title="流程分类2" dataIndex="processType2" />}
           <Table.Column title="描述" dataIndex="description" />
           <Table.Column title="操作" render={renderListButton} />
         </Table>

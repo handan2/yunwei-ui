@@ -68,10 +68,13 @@ export default (props) => {
       repeater: { asyncHandler }
     })
     core.setValues('diskChangeDec', '')
-    if (props.tableTypeVO) {//20220715  
-      let str = JSON.stringify(props.tableTypeVO)
-      if (str.indexOf('硬盘变更') != -1) //这里对表单字段命名加了约定
+    if (props.formTree) {//20220715  
+      let str = JSON.stringify(props.formTree)
+      console.log('2020715含 有硬盘变更字段')
+      if (str.indexOf('硬盘变更') != -1) {//这里对表单字段命名加了约定
+        console.log('2020715含 有硬盘变更字段')
         hasChangeDisk = true
+      }
       else
         hasChangeDisk = false
     }

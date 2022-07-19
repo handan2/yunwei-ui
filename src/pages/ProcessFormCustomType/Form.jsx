@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Form, { FormCore, FormItem, If } from 'noform'
-import { Checkbox, Input, Radio } from 'nowrapper/lib/antd'
-import { ajax, asConfigTablePath, formRule } from '../../utils'
+import { Checkbox, Input, Radio, TreeSelect } from 'nowrapper/lib/antd'
+import { ajax, asConfigTablePath,asDeviceCommonPath ,asTypePath, formRule } from '../../utils'
 import { Col, Row } from 'antd'
 
 let validate = {
@@ -22,6 +22,7 @@ export default (props) => {
       'as_computer_granted_flag': '否',
       'as_network_device_special_flag': '否',
       'as_security_products_special_flag': '否',
+      'as_application_special_flag': '否',
       'as_io_special_flag': '否'
     })
   } else {
@@ -29,36 +30,47 @@ export default (props) => {
   }
 
   const [tableTypeVO, setTableTypeVO] = useState()
+  const [typeData, setTypeData] = useState()
 
   useEffect(async () => {
+    const data2 = await ajax.get(asTypePath.getAsTypeTree)
+    data2 && setTypeData(data2)
     const data = await ajax.get(asConfigTablePath.asConfigTableTypeVO)
     data && setTableTypeVO(data)
+ 
   }, [])
 
   return <Form core={core} layout={{ label: 6, control: 18 }}>
-    <FormItem name="id" style={{ display: 'none' }}><Input/></FormItem>
+    <FormItem name="id" style={{ display: 'none' }}><Input /></FormItem>
     <FormItem name="strRule" style={{ display: 'none' }}
-              value={{ columnName: 'props', exclude: ['id', 'name'] }}>
-      <Input/>
+      value={{ columnName: 'props', exclude: ['id', 'name'] }}>
+      <Input />
     </FormItem>
-    <FormItem label='表名称' name="name" required><Input/></FormItem>
+    <FormItem label='表名称' name="name" required><Input /></FormItem>
+    <FormItem label="资产类别" name="asTypeId">
+      <TreeSelect
+        // style={{ width: width }}
+        treeData={typeData}
+        allowClear={true}
+      />
+    </FormItem>
     {
       tableTypeVO && Object.keys(tableTypeVO).map(key => {
         const [name, label] = key.split(',')
         return <div>
           <FormItem label={label} name={name + '_flag'}
-                    value={name === 'as_device_common' ? '是' : '否'}
-                    onChange={e => {
-                      if (e.target.value === '否') {
-                        core.setValue(e.target.name.replace('_flag', ''), null)
-                      } else {
-                        validate[name] = { type: 'array', required: true, message: label + '必须选择' }
-                      }
-                    }}>
+            // value={name === 'as_device_common' ? '是' : '否'}
+            onChange={e => {
+              if (e.target.value === '否') {
+                core.setValue(e.target.name.replace('_flag', ''), null)
+              } else {
+                validate[name] = { type: 'array', required: true, message: label + '必须选择' }
+              }
+            }}>
             <Radio.Group
               options={[
                 { label: '是', value: '是' },
-                { label: '否', value: '否' }]}/>
+                { label: '否', value: '否' }]} />
           </FormItem>
           <If when={(values) => values[name + '_flag'] === '是'}>
             <FormItem label={label + '属性'} name={name} required style={{ marginTop: 0 }}>

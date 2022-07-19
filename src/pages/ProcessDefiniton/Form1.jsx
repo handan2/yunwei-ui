@@ -27,7 +27,7 @@ export default () => {
     data && setProcessType(data)
     const data2 = await ajax.get(sysDicPath.getDicVL, { flag: '流程分类2' })
     data2 && setProcessType2(data2)
-    //
+    
     if (type === 'add') {
       form1Core.reset()
       form1Core.setValues({ processNameType: '流程定义名称', haveRate: '是',status:'启用', formLayout: 2, width: '95%' })

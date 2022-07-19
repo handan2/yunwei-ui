@@ -27,6 +27,16 @@ export default (props) => {
     })
     if (!core.getValues().diskChangeDec)
       core.setValues('diskChangeDec', '')
+    if (props.formTree) {//20220715  
+      let str = JSON.stringify(props.formTree)
+      console.log('2020715含 有硬盘变更字段')
+      if (str.indexOf('硬盘变更') != -1) {//这里对表单字段命名加了约定
+        console.log('2020715含 有硬盘变更字段')
+        hasChangeDisk = true
+      }
+      else
+        hasChangeDisk = false
+    }
   }, [])
 
   const renderView = (_, ctx) => {
@@ -212,29 +222,29 @@ export default (props) => {
                     </Col>
                     <Col span={24} style={{ padding: 0, margin: 0, }}>
                       <FormItem name="repeater" layout={{ label: 2, control: 22 }}>
-                      <SelectTableRepeater style={{ width: '100%' }} width={'100%'} locale='zh' hasAdd={repeaterModify} view={renderView}>
-                              <FormItem label='序列号' status={(values, core) => {
-                                return (values.flag === '新增' || values.flag === undefined) ? 'edit' : 'disabled'  //刚点新增按钮弹出的界面，flag是undefined
-                              }} name='sn' required validateConfig={{ type: 'string', required: true, message: '必填项' }}><Input style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”' /></FormItem>
-                              <FormItem label='型号' name='model' required validateConfig={{ type: 'string', required: true, message: '必填项' }}><Input style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”' /></FormItem>
-                              <FormItem label="容量（GB）" name="price" validateConfig={{ type: 'number', required: true, message: '必填项' }}><InputNumber style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”' /></FormItem>
-                              <FormItem label="密级" name="miji"><Input style={{ width: '100px' }} placeholder='自动填充' disabled /></FormItem>
-                              <FormItem status={(values, core) => {
-                                return values.hostAsId ? 'edit' : 'disabled'
-                              }} label='状态' name='state' defaultValue='在用' ><RadioGroup style={{ width: 200 }} options={diskStateOptions} /></FormItem>
-                              <FormItem label="主机ID" name="hostAsId" ><InputNumber style={{ width: '100px' }} placeholder='自动填充' disabled /></FormItem>
-                            </SelectTableRepeater>
-                          </FormItem>
-                        </Col>
-                        {/* 20220714 hasChangeDisk对下面的控制 */}
-                        {hasChangeDisk && <Col span={24} >
-                          <FormItem layout={{ label: 4, control: 20 }}
-                            label='变更情况' name='diskChangeDec'  >
-                            {/* 因在effect里初始置空串，所以不能用defaultValue*/}
-                            <Input disabled style={{ width: width * 3.5, fontWeight: 'bolder', color: 'red' }} placeholder='无变更' />
-                          </FormItem>
-                        </Col>
-                        }
+                        <SelectTableRepeater style={{ width: '100%' }} width={'100%'} locale='zh' hasAdd={repeaterModify} view={renderView}>
+                          <FormItem label='序列号' status={(values, core) => {
+                            return (values.flag === '新增' || values.flag === undefined) ? 'edit' : 'disabled'  //刚点新增按钮弹出的界面，flag是undefined
+                          }} name='sn' required validateConfig={{ type: 'string', required: true, message: '必填项' }}><Input style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”' /></FormItem>
+                          <FormItem label='型号' name='model' required validateConfig={{ type: 'string', required: true, message: '必填项' }}><Input style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”' /></FormItem>
+                          <FormItem label="容量（GB）" name="price" validateConfig={{ type: 'number', required: true, message: '必填项' }}><InputNumber style={{ width: '100px' }} placeholder='若实物未购置，请填“待定”' /></FormItem>
+                          <FormItem label="密级" name="miji"><Input style={{ width: '100px' }} placeholder='自动填充' disabled /></FormItem>
+                          <FormItem status={(values, core) => {
+                            return values.hostAsId ? 'edit' : 'disabled'
+                          }} label='状态' name='state' defaultValue='在用' ><RadioGroup style={{ width: 200 }} options={diskStateOptions} /></FormItem>
+                          <FormItem label="主机ID" name="hostAsId" ><InputNumber style={{ width: '100px' }} placeholder='自动填充' disabled /></FormItem>
+                        </SelectTableRepeater>
+                      </FormItem>
+                    </Col>
+                    {/* 20220714 hasChangeDisk对下面的控制 */}
+                    {hasChangeDisk && <Col span={24} >
+                      <FormItem layout={{ label: 4, control: 20 }}
+                        label='变更情况' name='diskChangeDec'  >
+                        {/* 因在effect里初始置空串，所以不能用defaultValue*/}
+                        <Input disabled style={{ width: width * 3.5, fontWeight: 'bolder', color: 'red' }} placeholder='无变更' />
+                      </FormItem>
+                    </Col>
+                    }
                   </>
                   )
                 else
@@ -252,7 +262,7 @@ export default (props) => {
           console.log(item.label)
           //setHasChangeDisk(true)//20220618  在组件创建时的渲染过程(20220714 函数组件每次渲染必经的“主执行过程”路上)，不能使用SetState:会导致一直不停渲染
           //hasChangeDisk = true;//20220714 这种方式同样有一个问题：因为变量不会引发自动渲染，在此语句执行之前的语句是获取不到这个值的
-        
+
         } else {
           tmpArr.push(<Col span={24 / colNum}>{getFormItem(item, core)}</Col>);
           if (tmpArr.length === colNum) {
@@ -271,16 +281,16 @@ export default (props) => {
   return <Form core={core} layout={{ label: 8, control: 16 }}>
     <Tabs animated={false}>
       <TabPane tab="表单" key="1">
-      <FormItem name="asset" style={{ display: 'none' }}><Input /></FormItem>
-      <FormItem name="assetForComputer" style={{ display: 'none' }}><Input /></FormItem>
-      {renderFormItem(props.formTree, 1, props.processDefinition.formLayout)}
-    </TabPane>
-    <TabPane tab="流程图" key="2">
-      <ProcessGraph record={props.record} />
-    </TabPane>
-    <TabPane tab="审批记录" key="3">
-      <ProcessInstanceNodeList record={props.record} />
-    </TabPane>
-  </Tabs>
+        <FormItem name="asset" style={{ display: 'none' }}><Input /></FormItem>
+        <FormItem name="assetForComputer" style={{ display: 'none' }}><Input /></FormItem>
+        {renderFormItem(props.formTree, 1, props.processDefinition.formLayout)}
+      </TabPane>
+      <TabPane tab="流程图" key="2">
+        <ProcessGraph record={props.record} />
+      </TabPane>
+      <TabPane tab="审批记录" key="3">
+        <ProcessInstanceNodeList record={props.record} />
+      </TabPane>
+    </Tabs>
   </Form >
 }

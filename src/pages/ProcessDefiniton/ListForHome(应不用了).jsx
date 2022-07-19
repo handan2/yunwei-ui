@@ -23,7 +23,7 @@ import Form1 from './Form1'
 import Form2 from './Form2'
 import Form3 from './Form3'
 import ProcessFormForStart from './ProcessFormForStart'
-import SelectUserGroup from './SelectUserGroup'
+import SelectOptionForm from './SelectOptionForm'
 
 //这是form3的回调函数
 let getForm3DataFunction
@@ -63,7 +63,7 @@ export default () => {
         locale: 'zh',
         enableValidate: true,
         width: 450,
-        content: <SelectUserGroup record={record} userVL={userVL} groupTree={groupTree} />,
+        content: <SelectOptionForm record={record} userVL={userVL} groupTree={groupTree} />,
         onOk: async (values, hide) => {
           //责任人
           userType = values.userType

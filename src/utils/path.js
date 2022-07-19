@@ -53,8 +53,9 @@ export const accountPath= {
 //设备类型
 export const asTypePath = {
   getAsTypeIdByName:contextPath + '/asType/getAsTypeIdByName',
-  getAllowedAsTypeIdByProDefId:contextPath + '/asType/getAllowedAsTypeIdByProDefId',
+ // getAllowedAsTypeIdByProDefId:contextPath + '/asType/getAllowedAsTypeIdByProDefId',
   getLevelTwoInFoAssetAsTypeLV:contextPath + '/asType/getLevelTwoInFoAssetAsTypeLV',
+  getAsTypeTree:contextPath + '/asType/getAsTypeTree',
 
 }
 //审计日志
@@ -148,9 +149,9 @@ export const sysUserPath = {
 }
 //流程管理
 export const asConfigTablePath = {
-  asConfigTableList: contextPath + '/asConfig/getTableList',
-  asConfigColumnList: contextPath + '/asConfig/getColumnList',
-  asConfigTableTypeVO: contextPath + '/asConfig/getTableTypeVO'
+  asConfigTableList: contextPath + '/asConfig/getAsConfigTableList',
+  asConfigColumnList: contextPath + '/asConfig/getAsConfigColumnList',
+  asConfigTableTypeVO: contextPath + '/asConfig/getAsConfigTableTypeVO'
 }
 
 export const diskForHisForProcessPath = {
@@ -254,7 +255,7 @@ export const asDeviceCommonPath = {
   edit: contextPath + '/asDeviceCommon/edit',
   delete:contextPath + '/asDeviceCommon/delete',
   getLevelTwoAsTypeById: contextPath + '/asDeviceCommon/getLevelTwoAsTypeById',
-  getAsTypeTree: contextPath + '/asDeviceCommon/getAsTypeTree',
+  // getAsTypeTree: contextPath + '/asDeviceCommon/getAsTypeTree',
   getAsDeviceCommonNoVL: contextPath + '/asDeviceCommon/getAsDeviceCommonNoVL',
   download1: contextPath + '/asDeviceCommon/download1',
   Upload1Form: AsDeviceCommonUpload1Form,

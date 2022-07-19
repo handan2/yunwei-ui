@@ -15,7 +15,7 @@ import { Dialog } from 'nowrapper/lib/antd';
 import ProcessFormForComplete from '../ProcessDefiniton/ProcessFormForComplete(暂时没用)';
 import ProcessFormForStart from '../ProcessDefiniton/ProcessFormForStart';
 import Abb from '../ProcessDefiniton/Test';
-import SelectUserGroup from '../ProcessDefiniton/SelectUserGroup';
+import SelectOptionForm from '../ProcessDefiniton/SelectOptionForm';
 import ProcessFormForCheck from '../ProcessDefiniton/ProcessFormForCheck';
 import ProcessFormForModify from '../ProcessDefiniton/ProcessFormForModify';
 import ProcessFormForEndAndStart from '../ProcessDefiniton/ProcessFormForEndAndStart';
@@ -50,15 +50,17 @@ export const onClickForStart = async (record, type) => {
         footerAlign: 'right',
         locale: 'zh',
         enableValidate: true,
-        width: 450,
+        width: 550,
         content: (
-          <SelectUserGroup
-            record={record} //仅用于判断是不是“代理流程”
+          <SelectOptionForm
+            record={record} //仅用于判断是不是“代理流程”；还用于判断是不是“外设申领”（是的话，读外设typeOptions）
             userVL={userVL}
-            groupTreeForSelect={groupTreeForSelect} //20220712 可能无值：也无妨
+            groupTreeForSelect={groupTreeForSelect} //20220712 用于代理流程；可能无值：也无妨
           />
         ),
         onOk: async (values, hide) => {
+          console.log('20220717 select group 提交后')
+          console.log(values)
           //责任人
           committerType = values.committerType;
           if (values.committerType === '代其他人申请') {
@@ -123,6 +125,9 @@ export const onClickForStart = async (record, type) => {
               processDefinitionId: record.id,
             },
           );
+          const userInfo = {committerType,committerIdStr}//20220718这种写法要注意
+          console.log('20220718n userinfo')
+          console.log(userInfo)
           Dialog.show({
             title: processForEntity?processNameForEntity:record.processName,
             footerAlign: 'right',
@@ -133,14 +138,18 @@ export const onClickForStart = async (record, type) => {
               <Tabs animated={false}>
                 <TabPane tab="表单" key="1">
                   <ProcessFormForStart
-                    //20211205仅需要SelectUserGroup返回的values里的committerType(是否是代人申请)/committerName（代人申请时有值，格式是那种“拼接长串”）
-                    userInfo={values} //仅用于传给formItemValidate作检验用
+                    //20211205仅需要SelectOptionForm返回的values里的committerType(是否是代人申请)/committerName（代人申请时有值，格式是那种“拼接长串”）
+                    userInfo={userInfo} //仅用于传给formItemValidate作检验用
                     changeColumnIdLableMap={changeColumnIdLableMap}
                     record={processForEntity?processForEntity:record}
                     formTree={formTree}
                     tableTypeVO={tableTypeVO}
                     selectGroupIdArr={selectGroupIdArr}
                     startProcessConditionVO={startProcessConditionVO}
+                    connectTypForAff={values.connectTypForAff}//20220718以下这三个不一定同时存在
+                    netTypeForAff={values.netTypeForAff}
+                   assetTypeIdForAff={values.assetTypeIdForAff}
+ 
                   />
                 </TabPane>
                 <TabPane tab="流程图2" key="2">
@@ -717,7 +726,7 @@ export const onClickForNextProcess = async (recordOld, list) => {
           <Tabs animated={false}>
             <TabPane tab="表单" key="1">
               <ProcessFormForEndAndStart
-                //20211205仅需要SelectUserGroup返回的values里的committerType(是否是代人申请)/committerName（代人申请时有值，格式是那种“拼接长串”）
+                //20211205仅需要SelectOptionForm返回的values里的committerType(是否是代人申请)/committerName（代人申请时有值，格式是那种“拼接长串”）
                 userInfo={values} //这个属性仅用于自动填充表单相关字段
                 changeColumnIdLableMap={changeColumnIdLableMap}
                 record={recordNew}

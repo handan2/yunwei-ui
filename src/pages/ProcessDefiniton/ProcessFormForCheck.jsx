@@ -3,7 +3,7 @@ import { Col, Divider, message, Row, Table, Tabs, Button, ConfigProvider } from 
 import Form, { FormCore, FormItem, Item, If } from 'noform'
 import { Checkbox, Dialog, InputNumber, Select, Input, Radio } from 'nowrapper/lib/antd'
 const { Group: RadioGroup } = Radio;
-import { ajax, formRule, sysDeptPath, sysRolePath, sysUserPath, width, asTypePath, processFormTemplatePath, processDefinitionPath } from '../../utils'
+import { ajax, formRule, sysDeptPath, sysRolePath, sysUserPath, width,  session, processFormTemplatePath, processDefinitionPath } from '../../utils'
 import getFormItem from './getFormItem'
 import _ from 'lodash'
 import CheckUserTransfer from './CheckUserTransfer'
@@ -23,7 +23,6 @@ let hasChangeDisk = false;
 export default (props) => {
   const [core] = useState(new FormCore())
   const [assetMap, setAssetMap] = useState(new Map());
-  const [assetParam, setAssetParam] = useState();
   const [processSelectOptions, setProcessSelectOptions] = useState([]);
   const [repeaterModify, setRepeaterModify] = useState(false); //20220616加
   const [diskStateOptions, setDiskStateOptions] = useState([{ label: '在用', value: '在用' }, { label: '报废', value: '报废' }, { label: '填错', value: '填错' }])//
@@ -50,11 +49,6 @@ export default (props) => {
     }
     console.log('111111111111111111')
     console.log(props.record)
-    const data3 = await ajax.get(asTypePath.getAllowedAsTypeIdByProDefId, {
-      id: props.record.processDefinitionId,//20220621 props.record此时传来是instanceData表数据：没有processType2字段
-    }); //20211110
-
-    data3 && setAssetParam({ typeId: data3 });
     const data4 = await ajax.get(processDefinitionPath.getProcessDefLV) //20220626加
     console.log('data4')
     console.log(data4)
@@ -65,10 +59,13 @@ export default (props) => {
     })
     if (!core.getValues().diskChangeDec)
       core.setValues('diskChangeDec', '')
-    if (props.tableTypeVO) {//20220715  
-      let str = JSON.stringify(props.tableTypeVO)
-      if (str.indexOf('硬盘变更') != -1) //这里对表单字段命名加了约定
+    if (props.formTree) {//20220715  
+      let str = JSON.stringify(props.formTree)
+      console.log('2020715含 有硬盘变更字段')
+      if (str.indexOf('硬盘变更') != -1) {//这里对表单字段命名加了约定
+        console.log('2020715含 有硬盘变更字段')
         hasChangeDisk = true
+      }
       else
         hasChangeDisk = false
     }
@@ -210,13 +207,15 @@ export default (props) => {
     }
   }
   const selectAsset = async (item) => {
+    const customTableId = parseInt(item.name.split('.')[0]);//20220716
+    const assetParams = { customTableId: customTableId,userDeptId:session.getItem('user').deptId}
     Dialog.show({
       title: '选择资产',
       footerAlign: 'label',
       locale: 'zh',
       enableValidate: true,
       width: 800,
-      content: <AsDeviceCommonQuery params={assetParam} />,
+      content: <AsDeviceCommonQuery params={assetParams} />,
 
       onOk: async (values, hide) => {
         if (!values.asDeviceCommonId) {
@@ -418,7 +417,7 @@ export default (props) => {
           console.log(item.label)
           //setHasChangeDisk(true)//20220618  在组件创建时的渲染过程(20220714 函数组件每次渲染必经的“主执行过程”路上)，不能使用SetState:会导致一直不停渲染
           //hasChangeDisk = true;//20220714 这种方式同样有一个问题：因为变量不会引发自动渲染，在此语句执行之前的语句是获取不到这个值的
-        
+
         } else {
           tmpArr.push(<Col span={24 / colNum}>{getFormItem(item, core)}</Col>);
           if (tmpArr.length === colNum) {

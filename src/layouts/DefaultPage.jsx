@@ -16,7 +16,7 @@ import { Dialog, Input } from 'nowrapper/lib/antd';
 import Form, { FormItem } from 'noform';
 import zhCN from 'antd/es/locale/zh_CN';
 import { onClickForStart } from '../pages/ProcessInstanceData/onClick';
-import { ajax, processDefinitionPath, processInstanceDataPath } from '../utils'
+import { ajax, processDefinitionPath, processInstanceDataPath,session } from '../utils'
 //全局样式
 import './global.less';
 
@@ -144,7 +144,7 @@ export default () => {
                 tab={
                   <span>
                     <ScheduleOutlined />
-                  已办事项
+                  已提事项
                 </span>
                 }
                 key="2"
@@ -182,7 +182,8 @@ export default () => {
                 key="1"
               >
                 <iframe
-                  src={"http://10.84.10.17:8888/webroot/decision/view/report?viewlet=test/assert_preview.cpt&user_name=" + JSON.parse(sessionStorage.getItem('user')).displayName}
+                  // src={"http://10.84.10.17:8888/webroot/decision/view/report?viewlet=test/assert_preview.cpt&user_name=" + JSON.parse(sessionStorage.getItem('user')).displayName}
+                  src={"http://localhost:8075/webroot/decision/view/report?viewlet=assert_preview.cpt&user_name=" + JSON.parse(sessionStorage.getItem('user')).displayName}
                   width="100%"
                   height="305px"
                   frameborder="no"
@@ -376,22 +377,22 @@ export default () => {
                   style={{ padding: '10px 0 0 40px ' }}
                 >
                   <Descriptions.Item label="用户姓名">
-                    {JSON.parse(sessionStorage.getItem('user')).displayName}
+                    {session.getItem('user').displayName}
                   </Descriptions.Item>
                   <Descriptions.Item label="登陆名称">
-                    {JSON.parse(sessionStorage.getItem('user')).loginName}
+                    {session.getItem('user').loginName}
                   </Descriptions.Item>
                   <Descriptions.Item label="所在部门">
-                    {JSON.parse(sessionStorage.getItem('user')).temp}
+                    {session.getItem('user').temp}
                   </Descriptions.Item>
                   <Descriptions.Item label="人员密级">
-                    {JSON.parse(sessionStorage.getItem('user')).secretDegree}
+                    {session.getItem('user').secretDegree}
                   </Descriptions.Item>
                   <Descriptions.Item label="账号状态">
-                    {JSON.parse(sessionStorage.getItem('user')).status}
+                    {session.getItem('user').status}
                   </Descriptions.Item>
                   <Descriptions.Item label="更新时间">
-                    {JSON.parse(sessionStorage.getItem('user')).createDatetime}
+                    {session.getItem('user').createDatetime}
                   </Descriptions.Item>
                   <Descriptions.Item label="备注">
                     北京市丰台区云岗西路一号院
