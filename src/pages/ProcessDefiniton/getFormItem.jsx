@@ -2,49 +2,61 @@ import { Checkbox, DatePicker, Input, InputNumber, Radio, Select, AutoComplete }
 import { FormItem } from 'noform'
 import { width } from '../../utils'
 import locale from 'antd/lib/date-picker/locale/zh_CN'
-//进到这个方法里的只有变更与空转字段；这些字段的name属性只是一个ID数字
-export default function(item, core) {
+//进到这个方法里的字段类型：变更+空转类型；变更类型的name属性只是一个ID数字
+export default function (item, core, isHide, layout, width1) {
   let tmp = {}
   if (item.defaultValue) {//把所有的formIte的默认值都赋了
     core.setValue(item.id + '', item.defaultValue)//item.id + ''仅是为了转成string
   }
   if (item.tooltip) {
-   // tmp.help = item.tooltip//:改在框内提示,但placeholder属性只能放在input组件中&tmp是给FormItem设的属性，所以只能逐一在每个imput里手工写了
+    // tmp.help = item.tooltip//:改在框内提示,但placeholder属性只能放在input组件中&tmp是给FormItem设的属性，所以只能逐一在每个imput里手工写了
   }
   if (item.flag === '字段变更类型') {
     tmp.label = item.label.split('.')[1]
   } else {
     tmp.label = item.label
   }
+  if (layout) {//20220726
+    tmp.layout = layout
+  }
+  if (width1) {//20220726
+    // width = width1
+    console.log('20220726 getFormITEM   width = width1')
+    console.log(width1)
+    console.log(width1 || width)
+  }
+
+
   switch (item.type) {
     case '文本框':
       if (item.required === '是') {
         tmp.required = true
-        tmp.validateConfig = { type: 'string', required: true, message: tmp.label + '不能为空' }
+        tmp.validateConfig = { type: 'string', required: !isHide, message: tmp.label + '不能为空' }
       } else {
         tmp.required = false
       }
-      return <FormItem name={item.id} {...tmp} ><Input style={{ width: width }} placeholder={item.tooltip} /></FormItem>
+      return <FormItem name={item.id} {...tmp} ><Input style={{ width: width1 || width }} placeholder={item.tooltip} /></FormItem>
     case '数字框':
       if (item.defaultValue) {
         core.setValue(item.id + '', parseInt(item.defaultValue))//int类型的默认值重新（以数字类型）再赋/覆盖一遍
       }
       if (item.required === '是') {
         tmp.required = true
-        tmp.validateConfig = { type: 'number', required: true, message: tmp.label + '不能为空' }
+        tmp.validateConfig = { type: 'number', required: !isHide, message: tmp.label + '不能为空' }
       } else {
         tmp.required = false
       }
-      return <FormItem name={item.id} {...tmp}><InputNumber placeholder={item.tooltip} style={{ width: width }}/></FormItem>
+      return <FormItem name={item.id} {...tmp}><InputNumber placeholder={item.tooltip} style={{ width: width }} /></FormItem>
     case '单选按钮':
       if (item.required === '是') {
         tmp.required = true
-        tmp.validateConfig = { type: 'string', required: true, message: tmp.label + '不能为空' }
+        tmp.validateConfig = { type: 'string', required: !isHide, message: tmp.label + '不能为空' }
+
       } else {
         tmp.required = false
       }
       return <FormItem name={item.id} {...tmp}>
-        <Radio.Group options={item.value.split(',').map(val => ({ label: val, value: val }))}/>
+        <Radio.Group options={item.value.split(',').map(val => ({ label: val, value: val }))} />
       </FormItem>
     case '复选框':
       if (item.defaultValue) {
@@ -52,57 +64,57 @@ export default function(item, core) {
       }
       if (item.required === '是') {
         tmp.required = true
-        tmp.validateConfig = { type: 'array', required: true, message: tmp.label + '不能为空' }
+        tmp.validateConfig = { type: 'array', required: !isHide, message: tmp.label + '不能为空' }
       } else {
         tmp.required = false
       }
       return <FormItem name={item.id} {...tmp}>
-        <Checkbox.Group options={item.value.split(',').map(val => ({ label: val, value: val }))} className='newLine'/>
+        <Checkbox.Group options={item.value.split(',').map(val => ({ label: val, value: val }))} className='newLine' />
       </FormItem>
     case '下拉单选不可编辑':
       if (item.required === '是') {
         tmp.required = true
-        tmp.validateConfig = { type: 'string', required: true, message: tmp.label + '不能为空' }
+        tmp.validateConfig = { type: 'string', required: !isHide, message: tmp.label + '不能为空' }
       } else {
         tmp.required = false
       }
       return <FormItem name={item.id} {...tmp}>
-        <Select options={item.value.split(',').map(val => ({ label: val, value: val }))} placeholder={item.tooltip} style={{ width: width }}/>
+        <Select options={item.value.split(',').map(val => ({ label: val, value: val }))} placeholder={item.tooltip} style={{ width: width }} />
       </FormItem>
     case '下拉单选可编辑':
       if (item.required === '是') {
         tmp.required = true
-        tmp.validateConfig = { type: 'string', required: true, message: tmp.label + '不能为空' }
+        tmp.validateConfig = { type: 'string', required: !isHide, message: tmp.label + '不能为空' }
       } else {
         tmp.required = false
       }
       return <FormItem name={item.id} {...tmp}>
         <AutoComplete options={item.value.split(',').map(val => ({ label: val, value: val }))}
-                     placeholder={item.tooltip} style={{ width: width }}/>
+          placeholder={item.tooltip} style={{ width: width }} />
       </FormItem>
     case '日期':
       if (item.required === '是') {
-        tmp.required = true
+       tmp.required = true
         tmp.validateConfig = {
           type: 'date',
-          required: true,
+          required: !isHide,
           message: tmp.label + '不能为空',
           validator: (rule, value) => !!value
         }
       } else {
-        tmp.required = false
+       tmp.required = false
       }
       return <>
-        <div style={{ display: 'none' }}><FormItem name={item.id + 'Date'}><Input/></FormItem></div>
+        <div style={{ display: 'none' }}><FormItem name={item.id + 'Date'}><Input /></FormItem></div>
         <FormItem name={item.id + 'DateTmp'} {...tmp}
-                  onChange={date => {
-                    if (date) {
-                      core.setValue(item.id + 'Date', date.format('YYYY-MM-DD'))
-                    } else {
-                      core.setValue(item.id + 'Date', '')
-                    }
-                  }}>
-          <DatePicker locale={locale} format="YYYY-MM-DD"  placeholder={item.tooltip} style={{ width: width }}/>
+          onChange={date => {
+            if (date) {
+              core.setValue(item.id + 'Date', date.format('YYYY-MM-DD'))
+            } else {
+              core.setValue(item.id + 'Date', '')
+            }
+          }}>
+          <DatePicker locale={locale} format="YYYY-MM-DD" placeholder={item.tooltip} style={{ width: width }} />
         </FormItem>
       </>
     case '日期时间':
@@ -110,7 +122,7 @@ export default function(item, core) {
         tmp.required = true
         tmp.validateConfig = {
           type: 'date',
-          required: true,
+          required: !isHide,
           message: tmp.label + '不能为空',
           validator: (rule, value) => !!value
         }
@@ -118,16 +130,16 @@ export default function(item, core) {
         tmp.required = false
       }
       return <>
-        <div style={{ display: 'none' }}><FormItem name={item.id + 'Datetime'}><Input/></FormItem></div>
+        <div style={{ display: 'none' }}><FormItem name={item.id + 'Datetime'}><Input /></FormItem></div>
         <FormItem name={item.id + 'DatetimeTmp'}  {...tmp}
-                  onChange={date => {
-                    if (date) {
-                      core.setValue(item.id + 'Datetime', date.format('YYYY-MM-DD HH:mm:ss'))
-                    } else {
-                      core.setValue(item.id + 'Datetime', '')
-                    }
-                  }}>
-          <DatePicker locale={locale} showTime format="YYYY-MM-DD HH:mm:ss" placeholder={item.tooltip}  style={{ width: width }}/>
+          onChange={date => {
+            if (date) {
+              core.setValue(item.id + 'Datetime', date.format('YYYY-MM-DD HH:mm:ss'))
+            } else {
+              core.setValue(item.id + 'Datetime', '')
+            }
+          }}>
+          <DatePicker locale={locale} showTime format="YYYY-MM-DD HH:mm:ss" placeholder={item.tooltip} style={{ width: width }} />
         </FormItem>
       </>
   }

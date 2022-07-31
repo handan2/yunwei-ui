@@ -2,13 +2,13 @@
 
 
 
-export const formItemValidate =(changeColumnIdLableMap,values) =>{
+export const formItemValidate =(changeColumnLabelIdMap,values) =>{
         //注意此方法要执行在表单基本校验之后
         //const loginUser = JSON.parse(sessionStorage.getItem('user'))
         
-        const idUserMiji = changeColumnIdLableMap['计算机信息表.责任人密级']//如果表单里没有此项也不会报错；20211211突然报了一次，在退网流程时，后来又没复现了，待排查；知道了在流程定义那个页面里没有调用 这个函数。也不是是流程定义那个页面发起流程时formItemAutoComplete这个函数报表，todo研
-        const idMiji = changeColumnIdLableMap['计算机信息表.涉密级别']
-        const idNetType = changeColumnIdLableMap['计算机信息表.联网类别']
+        const idUserMiji = changeColumnLabelIdMap['计算机信息表.责任人密级']//如果表单里没有此项也不会报错；20211211突然报了一次，在退网流程时，后来又没复现了，待排查；知道了在流程定义那个页面里没有调用 这个函数。也不是是流程定义那个页面发起流程时formItemAutoComplete这个函数报表，todo研
+        const idMiji = changeColumnLabelIdMap['计算机信息表.涉密级别']
+        const idNetType = changeColumnLabelIdMap['计算机信息表.联网类别']
         if('非密'===values[idUserMiji+''] &&( '机密'===values[idMiji+'']||'秘密'===values[idMiji+'']) ){//准确点应写成values[idUserMiji+'']
 
             return ('非密人员不能使用涉密设备')

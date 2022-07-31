@@ -22,16 +22,25 @@ export default (props) => {
 
   const editRecord = async (record) => {
     if (record.flag === '基本类型' || record.flag === '表类型') {
-      Dialog.show({
-        title: '修改字段',
-        footerAlign: 'label',
-        locale: 'zh',
-        enableValidate: true,
-        width: 600,
-        content: <OperateColumnForm operateType={'edit'} record={record} />,
-        onOk: async (values, hide) => {
-          operateColumnOnOk(values, 'edit', record, dataSourceKey, map, setMap)
-          hide()
+      Modal.info({
+        title: '提示',
+        content:<div>您正在修改"基本信息表"，修改后请务必同步<span style={{ fontSize:17,fontWeight: 'bold' }}>修改相对应的变更字段</span>的引用，否则将无法记录信息变更情况。</div> ,
+        okText: '我知道了',
+        closable: true,
+        onOk:async (destroy) => {
+          destroy()//20220723 注意Modal的关闭函数引用
+          Dialog.show({
+            title: '修改字段',
+            footerAlign: 'label',
+            locale: 'zh',
+            enableValidate: true,
+            width: 600,
+            content: <OperateColumnForm operateType={'edit'} record={record} />,
+            onOk: async (values, hide) => {
+              operateColumnOnOk(values, 'edit', record, dataSourceKey, map, setMap)
+              hide()
+            }
+          })
         }
       })
     } else if (record.flag === '字段变更类型') {
@@ -144,6 +153,16 @@ export default (props) => {
       }
     },
     {
+      title: '是否可见',
+      dataIndex: 'visible',
+      render: (text, record) => {//20211121字段组无须显示此值
+        if (record.flag == '字段组类型')
+          return <span></span>
+        else
+          return <span>{text}</span>
+      }
+    },
+    {
       title: '选项内容',
       dataIndex: 'value'
     },
@@ -154,7 +173,7 @@ export default (props) => {
     {
       title: '操作',
       render: (text, record) => {
-        if (dataSourceKey === 'firstData' && !record.groupParentLabel  && record.flag !== '字段组类型') {
+        if (dataSourceKey === 'firstData' && !record.groupParentLabel && record.flag !== '字段组类型') {
           //firstData中的基本类型+表类型
           return <Space>
             <a onClick={() => sort(record, 'up')}><Icon type="arrow-up" />上移</a>
@@ -162,7 +181,7 @@ export default (props) => {
             <a onClick={() => editRecord(record)}>修改</a>
             <a onClick={() => deleteRecord(record)}>删除</a>
           </Space>
-        } else if (dataSourceKey === 'firstData'   && record.flag === '字段组类型') {
+        } else if (dataSourceKey === 'firstData' && record.flag === '字段组类型') {
           //firstData中的字段组类型
           return <Space>
             <a onClick={() => sort(record, 'up')}><Icon type="arrow-up" />上移</a>
@@ -170,7 +189,7 @@ export default (props) => {
             <a onClick={() => editRecord(record)}>修改</a>
             <a onClick={() => deleteRecord(record)}>删除</a>
           </Space>
-        } else if (dataSourceKey !== 'firstData'  && record.flag !== '字段组类型') {
+        } else if (dataSourceKey !== 'firstData' && record.flag !== '字段组类型') {
           //字段组中的基本类型+表类型
           return <Space>
             <a onClick={() => sort(record, 'up')}><Icon type="arrow-up" />上移</a>
@@ -178,7 +197,7 @@ export default (props) => {
             <a onClick={() => editRecord(record)}>修改</a>
             <a onClick={() => deleteRecord(record)}>删除</a>
           </Space>
-        } else if (dataSourceKey !== 'firstData'  && record.flag === '字段组类型') {
+        } else if (dataSourceKey !== 'firstData' && record.flag === '字段组类型') {
           //字段组中的字段组类型
           return <Space>
             <a onClick={() => editRecord(record)}>修改</a>

@@ -198,7 +198,7 @@ export let processFormTemplatePath = {
   getSelectGroupIdList: contextPath + '/processFormTemplate/getSelectGroupIdList',
   getTableTypeVO: contextPath + '/processFormTemplate/getTableTypeVO',
   getTableTypeInstData: contextPath + '/processFormTemplate/getTableTypeInstData',
-  getChangeColumnIdLableMap:contextPath + '/processFormTemplate/getChangeColumnIdLableMap',
+  getChangeColumnLabelIdMap:contextPath + '/processFormTemplate/getChangeColumnLabelIdMap',
   getGroupKT:contextPath + '/processFormTemplate/getGroupKT',
 }
 //流程实例

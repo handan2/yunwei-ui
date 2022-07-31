@@ -12,9 +12,9 @@ export default (props) => {
       <Table.Column title="所在部门" dataIndex="deptName"/>
       <Table.Column title="处理人" dataIndex="displayName"/>
       <Table.Column title="处理状态" dataIndex="buttonName"/>
-      <Table.Column title="处理意见" dataIndex="comment"/>
-      <Table.Column title="到达时间" dataIndex="startDatetime"/>
-      <Table.Column title="完成时间" dataIndex="endDatetime"/>
+      <Table.Column title="处理结果" width = '250px' ellipsis={true}  dataIndex="comment"/>
+      <Table.Column title="到达时间" width = '160px' dataIndex="startDatetime"/>
+      <Table.Column title="完成时间"  width = '160px' dataIndex="endDatetime"/>
     </Table>
     <Pagination showTotal={total => `共${total}条`}/>
   </List>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Button,
@@ -45,12 +46,21 @@ export default () => {
 
   const sceneChoose = async (columnName) => {
     const startProcess = async (processName) => {
-      if ('计算机入网' === processName) {
+      if ('信息设备申领' === processName) {
 
         const data = await ajax.get(
           processDefinitionPath.getByName,
           {
-            processDefinitionName: '计算机入网',
+            processDefinitionName: '信息设备申领',
+          },
+        );
+        onClickForStart(data, 'start')
+      } else if ('终端故障报修' === processName) {
+
+        const data = await ajax.get(
+          processDefinitionPath.getByName,
+          {
+            processDefinitionName: '终端故障报修',
           },
         );
         onClickForStart(data, 'start')
@@ -80,7 +90,37 @@ export default () => {
               //color: 'white'
               // wordBreak: 'break-all'
             }}>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;作为一名新员工，你首先可能需要申领一台或几台办公电脑，那么请发起<a style={{ fontSize: '22px' }} onClick={() => { startProcess('计算机入网') }} >计算机申领流程</a>；同时，你还需要通过发起<a style={{ fontSize: '22px' }}>新用户入网流程</a>申请建立主机登陆用户及申请登陆密钥。值得注意的是，<a style={{ fontSize: '22px' }}>新用户入网流程</a>会自动帮你开通智企、邮件等应用系统的使用权限，但你如果还需要使用SAP/ERP、TC等应用系统，那么你还需要再自助发起<a style={{ fontSize: '22px' }}>应用系统用户变更流程</a>以建立相关用户哦 <Icon type="smile" style={{ fontSize: '18px', color: 'black' }} theme="outlined" />。
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;作为一名新员工，你首先可能需要申领一台或几台办公电脑，那么请发起<a style={{ fontSize: '22px' }} onClick={() => { startProcess('信息设备申领') }} >信息设备申领流程</a>；同时，你还需要通过发起<a style={{ fontSize: '22px' }}>新用户入网流程</a>申请建立主机登陆用户及申请登陆密钥。值得注意的是，<a style={{ fontSize: '22px' }}>新用户入网流程</a>会自动帮你开通智企、邮件等应用系统的使用权限，但你如果还需要使用SAP/ERP、TC等应用系统，那么你还需要再自助发起<a style={{ fontSize: '22px' }}>应用系统用户变更流程</a>以建立相关用户哦 <Icon type="smile" style={{ fontSize: '18px', color: 'black' }} theme="outlined" />。
+
+          </div>
+
+        ),
+        footer: (hide, { _, ctx: core }) => { }
+      })
+    } else if ('终端故障报修' === columnName) {
+      Dialog.show({
+        title: <span>应用场景——终端故障报修 <Icon type="tag" /></span>,
+        footerAlign: 'right',
+        locale: 'zh',
+        enableValidate: true,
+        width: 650,
+
+        content: (
+          <div
+            style={{
+              marginTop: '-20px',
+              // cursor: 'pointer',
+              background: 'WhiteSmoke',
+              height: '300px',
+              //lineHeight: '400px',
+              fontSize: '16px',
+              verticalAlign: 'middle',
+              display: 'table-cell',//这两个是为了垂直居中
+              //textAlign: 'center',
+              //color: 'white'
+              // wordBreak: 'break-all'
+            }}>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;如果您的计算机使用中，发生软硬件故障，经本部门协管员处理仍无法解决，如果本人已无法正常登陆本系统，那么由本部门其他同事代为发起<a style={{ fontSize: '22px' }} onClick={() => { startProcess('终端故障报修') }} >终端故障报修流程</a>；同时，你还可以直接联系运维中心<a>42540</a>报修 <Icon type="smile" style={{ fontSize: '18px', color: 'black' }} theme="outlined" />。
 
           </div>
 
@@ -88,7 +128,7 @@ export default () => {
         footer: (hide, { _, ctx: core }) => { }
       })
     }
-
+  
 
   }
   // const columnDataSource = [{title:'新职工入职',sort:1,icon:<UserOutlined/>,highlight}]
@@ -275,8 +315,7 @@ export default () => {
                     fontSize: '16px',
                     textAlign: 'center',
                     color: 'white',
-
-                  }}><CrownOutlined />  终端故障报修</div></Col>
+                  }} onClick={() => { sceneChoose('终端故障报修') }} ><CrownOutlined />  终端故障报修</div></Col>
                   <Col span={6} >  <div style={{
                     cursor: 'pointer',
                     background: '#00a0e9',
@@ -485,3 +524,4 @@ export default () => {
     </Layout>
   </div>
 };
+

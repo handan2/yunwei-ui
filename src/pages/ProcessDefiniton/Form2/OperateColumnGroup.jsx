@@ -33,7 +33,7 @@ export default () => {
   return <>
     <Button onClick={() => {
       core.reset()
-      core.setValues({ groupLayout: 2, haveGroupSelect: '否' })
+      core.setValues({ groupLayout: 2, haveGroupSelect: '否' ,visible:'是'})
       setGroupOperate('add')
       setModalVisitForGroup(true)
     }} type={'primary'}>添加字段组</Button>
@@ -150,6 +150,25 @@ export default () => {
                     { label: '一行四列', value: 4 }]}/>
         </FormItem>
         <FormItem name="haveGroupSelect" label="字段组选择">
+          <Radio.Group style={{ width: 100 }}
+                       options={[
+                         { label: '是', value: '是' },
+                         { label: '否', value: '否' }]}/>
+        </FormItem>
+        <FormItem name="visible" label="     界面可见"  onChange={(event) => {
+          if (event.target.value === '否') {
+            Modal.warning({
+              title: '提示',
+              content: (
+                <div>
+                  <p>如果字段组设置了“不可见”，那么<span style={{ fontSize: 15,fontWeight:'bold' }}>组内的字段的“必填项”均需设置为“否”</span>，同时这个字段组里也<span style={{ fontSize: 15,fontWeight:'bold' }}>不能有“表类型”</span>，否则提交流程时会校验不通过哦~     </p>
+                </div>
+              ),
+              okText: '确定',
+              closable: true,
+            });
+          }
+        }}>
           <Radio.Group style={{ width: 100 }}
                        options={[
                          { label: '是', value: '是' },

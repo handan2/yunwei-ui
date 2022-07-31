@@ -86,7 +86,7 @@ export default (props) => {
         </FormItem>
       </div>
     </If>
-    {((props.record.processName.indexOf('外设、声像及办公自动化申领') != -1) || delegateChooseAff) && <FormItem label="运行方式" name="connectTypForAff" defaultValue='连接计算机'>
+    {((props.record.processName.indexOf('外设声像及办公自动化申领') != -1) || delegateChooseAff) && <FormItem label="运行方式" name="connectTypeForAff" defaultValue='连接计算机'>
       <Radio.Group
         options={[
           { label: '直连网络', value: '直连网络' },
@@ -95,8 +95,8 @@ export default (props) => {
         ]} />
     </FormItem>
     }
-    {((props.record.processName.indexOf('外设、声像及办公自动化申领') != -1) || delegateChooseAff) &&
-      <If when={(values) => values.connectTypForAff === '直连网络'}>
+    {((props.record.processName.indexOf('外设声像及办公自动化申领') != -1) || delegateChooseAff) &&
+      <If when={(values) => values.connectTypeForAff === '直连网络'}>
 
         <FormItem
           defaultMinWidth={false}
@@ -121,7 +121,7 @@ export default (props) => {
         </FormItem>
 
       </If>}
-    {((props.record.processName.indexOf('外设、声像及办公自动化申领') != -1) || delegateChooseAff) && <If when={(values) => values.connectTypForAff === '连接计算机'}>
+    {((props.record.processName.indexOf('外设声像及办公自动化申领') != -1) || delegateChooseAff) && <If when={(values) => values.connectTypeForAff === '连接计算机'}>
       <FormItem
         defaultMinWidth={false}
         name='assetTypeIdForAff'
@@ -172,10 +172,10 @@ export default (props) => {
         <Select
           options={asTypeLVOptions}
           onSelect={(value, node) => {
-            if (value.indexOf('外设、声像及办公自动化') != -1) {
+            if (value.indexOf('外设声像及办公自动化') != -1) {
               setDelegateChooseAff(true)
               setDelegateAssetChooseVisbile('none')
-              console.log('代理流程：设备选 了 ：外设、声像及办公自动化')
+              console.log('代理流程：设备选 了 ：外设声像及办公自动化')
             }
 
             // core.setValue('delegateProcessAssetType','外设、声像及办公自动化')

@@ -59,8 +59,8 @@ export const onClickForStart = async (record, type) => {
           />
         ),
         onOk: async (values, hide) => {
-          console.log('20220717 select group 提交后')
-          console.log(values)
+          console.log('20220717 select group 提交后');
+          console.log(values);
           //责任人
           committerType = values.committerType;
           if (values.committerType === '代其他人申请') {
@@ -72,23 +72,19 @@ export const onClickForStart = async (record, type) => {
               committerIdStr = values.committerIdStr;
             }
           }
-          let processNameForEntity, processForEntity
+          let processNameForEntity, processForEntity =null;
           if (record.integrationMode === '代理流程') {
-            processNameForEntity =
-              values.assetType + record.processType + '流程'; //组织实体流程名：这里对流程命名规则有了约定
-           processForEntity = await ajax.get(
-              processDefinitionPath.getByName,
-              {
-                processDefinitionName: processNameForEntity,
-              },
-            );
-            if (!processForEntity) {
+            processNameForEntity = values.assetType + record.processType + '流程'; //组织实体流程名：这里对流程命名规则有了约定
+            processForEntity = await ajax.get(processDefinitionPath.getByName, {
+              processDefinitionName: processNameForEntity,
+            });
+            if (!processForEntity) {  
               Modal.error({
                 content: processNameForEntity + '不存在，请联系管理员！',
               });
               return;
             }
-            record.id = processForEntity.id
+            record.id = processForEntity.id;
           }
           //可见的字段组
           const data = await ajax.get(
@@ -119,37 +115,36 @@ export const onClickForStart = async (record, type) => {
             { processDefinitionId: record.id },
           );
           //20211206  获取template Label/id的映射；接收前端成为一个对象：属性名是label值，值为ID;是为了辅助“自动填充”功能准备的
-          const changeColumnIdLableMap = await ajax.get(
-            processFormTemplatePath.getChangeColumnIdLableMap,
+          const changeColumnLabelIdMap = await ajax.get(
+            processFormTemplatePath.getChangeColumnLabelIdMap,
             {
               processDefinitionId: record.id,
             },
           );
-          const userInfo = {committerType,committerIdStr}//20220718这种写法要注意
-          console.log('20220718n userinfo')
-          console.log(userInfo)
+          const userInfo = { committerType, committerIdStr }; //20220718这种写法要注意
+          console.log('20220718n userinfo');
+          console.log(userInfo);
           Dialog.show({
-            title: processForEntity?processNameForEntity:record.processName,
+            title: processForEntity ? processNameForEntity : record.processName,
             footerAlign: 'right',
             locale: 'zh',
             enableValidate: true,
-            width: '75%',
+            width: '1123px',
             content: (
               <Tabs animated={false}>
                 <TabPane tab="表单" key="1">
                   <ProcessFormForStart
                     //20211205仅需要SelectOptionForm返回的values里的committerType(是否是代人申请)/committerName（代人申请时有值，格式是那种“拼接长串”）
                     userInfo={userInfo} //仅用于传给formItemValidate作检验用
-                    changeColumnIdLableMap={changeColumnIdLableMap}
-                    record={processForEntity?processForEntity:record}
+                    changeColumnLabelIdMap={changeColumnLabelIdMap}
+                    record={processForEntity ? processForEntity : record}
                     formTree={formTree}
                     tableTypeVO={tableTypeVO}
                     selectGroupIdArr={selectGroupIdArr}
                     startProcessConditionVO={startProcessConditionVO}
-                    connectTypForAff={values.connectTypForAff}//20220718以下这三个不一定同时存在
+                    connectTypeForAff={values.connectTypeForAff} //20220718以下这三个不一定同时存在
                     netTypeForAff={values.netTypeForAff}
-                   assetTypeIdForAff={values.assetTypeIdForAff}
- 
+                    assetTypeIdForAff={values.assetTypeIdForAff}
                   />
                 </TabPane>
                 <TabPane tab="流程图2" key="2">
@@ -183,7 +178,7 @@ export const onClickForStart = async (record, type) => {
                   //表单的ErrMsg处理
                   values = formRule.errMsgHandle(values);
                   //20211206 todo添加表单校验,思考表单template结构数据data4定义在ProcessFormForStart，如何共用？
-                  const msg = formItemValidate(changeColumnIdLableMap, values);
+                  const msg = formItemValidate(changeColumnLabelIdMap, values);
                   if (msg) {
                     Modal.error({
                       title: '提示',
@@ -363,8 +358,13 @@ export const onClickForMy = async (record, list) => {
       processInstanceDataId: record.id,
     },
   );
+  let operateFlag = '操作类型';
+  if (processDefinition.processName.indexOf('报修') != -1)
+    operateFlag = '操作类型（报修）';
+  else if (processDefinition.processName.indexOf('报废') != -1)
+    operateFlag = '操作类型（报废）';
   const operateArr = await ajax.get(sysDicPath.getDicValueList, {
-    flag: '操作类型',
+    flag: operateFlag,
   });
   let recordOld;
   if (record.preProcessInstanceId) {
@@ -391,7 +391,7 @@ export const onClickForMy = async (record, list) => {
       footerAlign: 'right',
       locale: 'zh',
       enableValidate: true,
-      width: '75%',
+      width: '1123px',
       content: (
         <ProcessFormForCheck
           record={record}
@@ -702,8 +702,8 @@ export const onClickForNextProcess = async (recordOld, list) => {
         { processDefinitionId: recordNew.id },
       );
       //20211206  获取template Label/id的映射；接收前端成为一个对象：属性名是label值，值为ID;是为了辅助“自动填充”功能准备的
-      const changeColumnIdLableMap = await ajax.get(
-        processFormTemplatePath.getChangeColumnIdLableMap,
+      const changeColumnLabelIdMap = await ajax.get(
+        processFormTemplatePath.getChangeColumnLabelIdMap,
         {
           processDefinitionId: recordNew.id,
         },
@@ -721,15 +721,16 @@ export const onClickForNextProcess = async (recordOld, list) => {
         footerAlign: 'right',
         locale: 'zh',
         enableValidate: true,
-        width: '75%',
+        width: '1123px',
         content: (
           <Tabs animated={false}>
             <TabPane tab="表单" key="1">
               <ProcessFormForEndAndStart
                 //20211205仅需要SelectOptionForm返回的values里的committerType(是否是代人申请)/committerName（代人申请时有值，格式是那种“拼接长串”）
                 userInfo={values} //这个属性仅用于自动填充表单相关字段
-                changeColumnIdLableMap={changeColumnIdLableMap}
+                changeColumnLabelIdMap={changeColumnLabelIdMap}
                 record={recordNew}
+                hasOldProcess={true}
                 //  preProcessInstDataId={recordOld.id}
                 formTree={formTree}
                 tableTypeVO={tableTypeVO}
@@ -770,7 +771,7 @@ export const onClickForNextProcess = async (recordOld, list) => {
               //表单的ErrMsg处理
               values = formRule.errMsgHandle(values);
               //20211206 todo添加表单校验,思考表单template结构数据data4定义在ProcessFormForStart，如何共用？
-              const msg = formItemValidate(changeColumnIdLableMap, values);
+              const msg = formItemValidate(changeColumnLabelIdMap, values);
               if (msg) {
                 Modal.error({
                   title: '提示',
@@ -946,7 +947,7 @@ export const onClickForModify = async (record, list) => {
       footerAlign: 'right',
       locale: 'zh',
       enableValidate: true,
-      width: '75%',
+      width: '1123px',
       content: (
         <ProcessFormForModify
           record={record}
@@ -1032,7 +1033,7 @@ export const onClickForCurrent = async (record) => {
       footerAlign: 'right',
       locale: 'zh',
       enableValidate: true,
-      width: '75%',
+      width: '1123px',
       content: (
         <ProcessFormForModify
           record={record}
@@ -1080,7 +1081,7 @@ export const onClickForComplete = async (record) => {
       footerAlign: 'right',
       locale: 'zh',
       enableValidate: true,
-      width: '75%',
+      width: '1123px',
       content: (
         <ProcessFormForModify
           record={record}

@@ -8,8 +8,8 @@ export default (props) => {
   console.log(props.map)
   const [changeColumnNameArr, setChangeColumnNameArr] = useState()
   useEffect(() => {
-    core.setValue('varNameFormItem',core.getValue('varName'))//20220708 可以问下张强，如何让select组件只显示option有的东东，而不是现在这样没有的也能显示在输入框中
-    core.setValue('varNameCustom',core.getValue('varName'))
+    core.setValue('varNameFormItem', core.getValue('varName'))//20220708 可以问下张强，如何让select组件只显示option有的东东，而不是现在这样没有的也能显示在输入框中
+    core.setValue('varNameCustom', core.getValue('varName'))
     let changeColumnZhNameArr = []
     props.map.forEach((value, key) => {
       console.log(key); console.log(value)
@@ -18,13 +18,21 @@ export default (props) => {
         value.map(item => {
           Object.keys(item).forEach((propertyName) => {
             let tmp = {}
-            if (propertyName === 'flag' && item[propertyName] === '字段变更类型') {
-              let [tableZhName, columnZhName] = item['label'].split('.')
-              tmp.label = columnZhName
-              tmp.value = columnZhName
-              changeColumnZhNameArr.push(tmp)
-              console.log('propertyName遍历')
-              console.log(tmp)
+            if (propertyName === 'flag') {
+              if (item[propertyName] === '字段变更类型') {
+                let [tableZhName, columnZhName] = item['label'].split('.')
+                tmp.label = columnZhName
+                tmp.value = columnZhName
+                changeColumnZhNameArr.push(tmp)
+                console.log('propertyName遍历')
+                console.log(tmp)
+              } else if (item[propertyName] === '基本类型') {
+
+                let columnZhName = item['label']
+                tmp.label = columnZhName
+                tmp.value = columnZhName
+                changeColumnZhNameArr.push(tmp)
+              }
             }
 
 
@@ -93,28 +101,28 @@ export default (props) => {
         </FormItem>
         <FormItem name="varNameCustom" required style={{ display: isVarNameFormItem ? 'none' : 'block' }}
           onChange={(event) => {
-            if(core.getValue('varNameType')==='自定义'){
-               console.log('varNameCustom onchange');
-               console.log(event);
-               core.setValue('varName', core.getValue('varNameCustom'))
-            }else{
-            
+            if (core.getValue('varNameType') === '自定义') {
+              console.log('varNameCustom onchange');
+              console.log(event);
+              core.setValue('varName', core.getValue('varNameCustom'))
+            } else {
+
             }
           }}
-        
-         >
+
+        >
           <Input />
         </FormItem>
         <FormItem name="varNameFormItem" style={{ display: isVarNameFormItem ? 'block' : 'none' }}
-          onChange={(value) => { 
-            if(core.getValue('varNameType')==='表单项名称'){
+          onChange={(value) => {
+            if (core.getValue('varNameType') === '表单项名称') {
               console.log('varNameFormItem onchange');
               core.setValue('varName', value)
               console.log(value);
-           }else{
-            
-           }
-             }}>
+            } else {
+
+            }
+          }}>
           <Select
             options={changeColumnNameArr} />
         </FormItem>

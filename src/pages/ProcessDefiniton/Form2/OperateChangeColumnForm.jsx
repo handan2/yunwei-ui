@@ -85,6 +85,27 @@ export default (props) => {
               { label: '是', value: '是' },
               { label: '否', value: '否' }]}/>
         </FormItem>
+        <FormItem name="visible" label="界面可见" defaultValue='是'  onChange={(event) => {
+          if (event.target.value === '否') {
+            Modal.warning({
+              title: '提示',
+              content: (
+                <div>
+                  <p style={{ fontSize: 15 }}>
+                    如果设置“不可见”，那么<span style={{ fontSize: 15,fontWeight:'bold' }}>“必填项”必须设置成“否”</span>，否则提交表单会报错哦~                   
+                  </p>
+                </div>
+              ),
+              okText: '确定',
+              closable: true,
+            });
+          }
+        }}>
+          <Radio.Group style={{ width: 100 }}
+                       options={[
+                         { label: '是', value: '是' },
+                         { label: '否', value: '否' }]}/>
+        </FormItem>
         <FormItem name='tooltip' label='提示'><Input style={{ width: width }}/></FormItem>
       </>
     </If>

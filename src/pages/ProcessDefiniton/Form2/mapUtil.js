@@ -142,7 +142,7 @@ export default {
             //
             let group = newMap.get(item.label)
             let children = []
-            group.forEach(itemm => {
+            group?.forEach(itemm => {
               itemm.groupParentLabel = item.label
               children.push(itemm)
             })
@@ -169,3 +169,5 @@ export default {
     })
   }
 }
+
+
